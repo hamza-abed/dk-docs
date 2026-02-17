@@ -1,0 +1,52 @@
+---
+title: Renouveler le token
+description: Renouvelle un token JWT expiré sans redemander les identifiants.
+---
+
+## POST /auth/refresh
+
+Renouvelle un token JWT expiré ou sur le point d'expirer en utilisant le `refresh_token`. Aucun identifiant n'est requis.
+
+### Body
+
+<ParamField body="refresh_token" type="string" required>
+  Le token de renouvellement obtenu lors du login ou de l'inscription. Valable 30 jours.
+</ParamField>
+
+### Exemple de requête
+
+```bash
+curl -X POST https://api.dispatchkit.io/api/v1/auth/refresh \
+  -H "Content-Type: application/json" \
+  -d '{
+    "refresh_token": "rt_01J5XKTY4H3GNQV2..."
+  }'
+```
+
+### Réponse
+
+<ResponseField name="token" type="string">
+  Nouveau token JWT valable 24 heures.
+</ResponseField>
+
+<ResponseField name="refresh_token" type="string">
+  Nouveau token de renouvellement. L'ancien token est invalidé.
+</ResponseField>
+
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refresh_token": "rt_01J5XKTY4H3GNQV3..."
+}
+```
+
+<Note>
+  Chaque appel à `/auth/refresh` invalide l'ancien `refresh_token` et en génère un nouveau. Stockez toujours le dernier token retourné.
+</Note>
+
+### Erreurs
+
+| Code HTTP | Code erreur | Description |
+|-----------|-------------|-------------|
+| `401` | `INVALID_REFRESH_TOKEN` | Token de renouvellement invalide ou expiré |
+| `401` | `REFRESH_TOKEN_REVOKED` | Token révoqué suite à une déconnexion explicite |

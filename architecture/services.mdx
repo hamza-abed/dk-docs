@@ -1,0 +1,137 @@
+---
+title: Services
+description: Description technique de chaque service composant la plateforme DispatchKit.
+---
+
+## Services
+
+DispatchKit est composé de 6 services indépendants. Chaque service est déployé séparément et communique via HTTP ou Redis pub/sub.
+
+## dk-backend — API REST principale
+
+**Stack** : Go 1.25, Gin, SQLC, PostgreSQL, Redis
+
+Le service central exposant l'API REST utilisée par le dashboard web, l'application mobile et les intégrations tierces.
+
+### Responsabilités
+- Authentification et gestion des sessions JWT
+- CRUD complet sur les ressources : missions, opérateurs, clients, organisations
+- Application des règles métier (statuts, permissions, rôles)
+- Publication d'événements vers dk-sse lors des changements d'état
+
+### Points d'entrée
+- `GET /api/v1/health` — healthcheck
+- `POST /api/v1/auth/*` — authentification
+- `GET/POST/PATCH /api/v1/missions` — gestion des missions
+- `GET/POST /api/v1/operators` — gestion des opérateurs
+- `GET/POST /api/v1/clients` — gestion des clients
+- `GET /api/v1/organizations` — gestion des organisations
+
+### Dépendances
+- **PostgreSQL** — stockage principal de toutes les données métier
+- **Redis** — cache des sessions, rate limiting, pub/sub pour dk-sse
+
+## dk-sse — Server-Sent Events
+
+**Stack** : Go, Redis pub/sub
+
+Service dédié à la diffusion d'événements temps réel vers les clients connectés (dashboard, app mobile, portail client).
+
+### Responsabilités
+- Maintenir les connexions SSE persistantes avec les clients
+- S'abonner aux canaux Redis publiés par dk-backend et dk-positions
+- Router les événements vers les bons abonnés (par organisation, par mission)
+- Gérer la reconnexion et le replay d'événements manqués
+
+### Architecture interne
+
+```
+Redis channel: org:{org_id}:events
+        ↓
+dk-sse (subscriber)
+        ↓
+Connexions SSE filtrées par token JWT → Clients
+```
+
+### Connexion
+```
+GET https://sse.dispatchkit.io/stream
+Authorization: Bearer {token}
+Accept: text/event-stream
+```
+
+## dk-positions — Service GPS
+
+**Stack** : Go, TimescaleDB (PostgreSQL extension)
+
+Service haute performance dédié à l'ingestion et au stockage des positions GPS des opérateurs.
+
+### Responsabilités
+- Ingérer les positions GPS à haute fréquence (5s par opérateur)
+- Persister l'historique dans TimescaleDB
+- Mettre à jour la dernière position dans Redis (cache)
+- Publier les événements `position.updated` dans Redis pour dk-sse
+
+### Performance
+
+Conçu pour gérer **10 000+ positions/minute** sans dégradation :
+- Insertion batch dans TimescaleDB avec partitionnement temporel
+- Cache Redis pour les lectures de la "dernière position"
+- Indexation par `(operator_id, timestamp)` pour les requêtes d'historique
+
+### Rétention des données
+- **Données complètes** : 90 jours
+- **Données agrégées** (1 point/minute) : 1 an
+- Suppression automatique via les politiques de rétention TimescaleDB
+
+## dk-front — Dashboard web
+
+**Stack** : Next.js 15, React 19, MUI Joy, Tailwind CSS, Zustand
+
+L'interface web utilisée par les dispatchers, managers et administrateurs.
+
+### Fonctionnalités principales
+- Vue carte temps réel avec positions des opérateurs (MapLibre GL)
+- Liste et gestion des missions avec filtres avancés
+- Tableau de bord analytique (missions du jour, taux de complétion)
+- Gestion de l'équipe et des organisations
+- Paramètres et notifications
+
+### Architecture Next.js
+- **App Router** avec Server Components pour les pages statiques
+- **Client Components** pour la carte et les flux SSE
+- **Server Actions** pour les mutations (création de mission, invitation)
+- **Middleware** pour l'authentification et le routage par organisation
+
+## dk-mobile — Application mobile
+
+**Stack** : React Native Expo, TypeScript
+
+L'application iOS et Android utilisée par les opérateurs terrain.
+
+### Fonctionnalités principales
+- Authentification et gestion du profil
+- Liste des missions assignées avec détails
+- Navigation GPS vers le lieu d'intervention
+- Mise à jour des statuts de mission (En route, Sur place, Terminé)
+- Capture de photos et signature client pour la complétion
+- Transmission de position GPS en arrière-plan
+
+### Permissions requises
+- **Localisation en arrière-plan** — pour le tracking GPS continu
+- **Caméra** — pour les photos de complétion
+- **Notifications push** — pour les nouvelles missions
+
+## dk-infra — Infrastructure
+
+**Stack** : Terraform, Kubernetes, Helm
+
+Gestion de l'infrastructure cloud en code.
+
+### Ce qui est géré
+- Cluster Kubernetes (GKE / EKS)
+- Bases de données managées (PostgreSQL, Redis, TimescaleDB)
+- Ingress et certificats TLS (cert-manager)
+- Pipelines CI/CD (GitHub Actions)
+- Monitoring (Prometheus, Grafana)
+- Alerting (PagerDuty)

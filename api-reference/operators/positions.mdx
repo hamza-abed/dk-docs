@@ -1,0 +1,88 @@
+---
+title: Positions GPS
+description: Récupère l'historique des positions GPS d'un opérateur.
+---
+
+## GET /operators/{id}/positions
+
+Retourne l'historique des positions GPS d'un opérateur sur une période donnée.
+
+### Path params
+
+<ParamField path="id" type="string" required>
+  Identifiant unique de l'opérateur.
+</ParamField>
+
+### Query params
+
+<ParamField query="from" type="string" required>
+  Date/heure de début au format ISO 8601.
+</ParamField>
+
+<ParamField query="to" type="string">
+  Date/heure de fin au format ISO 8601 (défaut : maintenant).
+</ParamField>
+
+<ParamField query="mission_id" type="string">
+  Filtre les positions associées à une mission spécifique.
+</ParamField>
+
+### Exemple de requête
+
+```bash
+# Positions d'un opérateur sur la journée
+curl "https://api.dispatchkit.io/api/v1/operators/usr_01J5XKTY4H3GNQV2/positions?from=2024-01-15T08:00:00Z&to=2024-01-15T18:00:00Z" \
+  -H "Authorization: Bearer {token}"
+```
+
+### Réponse
+
+```json
+{
+  "operator_id": "usr_01J5XKTY4H3GNQV2",
+  "positions": [
+    {
+      "lat": 48.8566,
+      "lng": 2.3522,
+      "accuracy": 4.5,
+      "heading": 270,
+      "speed": 35.2,
+      "timestamp": "2024-01-15T10:30:00Z"
+    },
+    {
+      "lat": 48.8570,
+      "lng": 2.3515,
+      "accuracy": 5.1,
+      "heading": 265,
+      "speed": 32.0,
+      "timestamp": "2024-01-15T10:30:05Z"
+    }
+  ],
+  "count": 2456,
+  "from": "2024-01-15T08:00:00Z",
+  "to": "2024-01-15T18:00:00Z"
+}
+```
+
+<Note>
+  Les positions sont retournées dans l'ordre chronologique. Pour des plages de temps longues, la réponse peut contenir plusieurs milliers de points — pensez à filtrer par `mission_id` pour réduire le volume.
+</Note>
+
+## GET /operators/{id}/positions/latest
+
+Retourne uniquement la dernière position connue de l'opérateur depuis le cache Redis.
+
+```bash
+curl https://api.dispatchkit.io/api/v1/operators/usr_01J5XKTY4H3GNQV2/positions/latest \
+  -H "Authorization: Bearer {token}"
+```
+
+```json
+{
+  "operator_id": "usr_01J5XKTY4H3GNQV2",
+  "lat": 48.8647,
+  "lng": 2.3499,
+  "accuracy": 3.8,
+  "updated_at": "2024-01-15T10:32:45Z"
+}
+```

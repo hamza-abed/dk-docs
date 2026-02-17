@@ -1,0 +1,107 @@
+---
+title: Vue d'ensemble
+description: Architecture microservices de DispatchKit — services, communication et flux de données.
+---
+
+## Vue d'ensemble de l'architecture
+
+DispatchKit est construit sur une architecture microservices. Chaque service a une responsabilité unique et communique via HTTP REST ou des flux SSE.
+
+## Diagramme d'architecture
+
+```
+                           ┌─────────────────────────────────────────┐
+                           │            Clients                       │
+                           │  Dashboard Web    App Mobile             │
+                           │  (Next.js 15)     (React Native)         │
+                           └────────┬──────────────┬──────────────────┘
+                                    │              │
+                           HTTP/REST│              │HTTP/REST + SSE
+                                    │              │
+              ┌─────────────────────▼──────────────▼──────────────────┐
+              │                   API Gateway                          │
+              │              (Nginx / Load Balancer)                   │
+              └───────────┬────────────────┬────────────┬─────────────┘
+                          │                │            │
+              ┌───────────▼───┐   ┌────────▼──────┐   ┌▼─────────────┐
+              │  dk-backend   │   │    dk-sse     │   │ dk-positions │
+              │  (Go + Gin)   │   │  (Go + SSE)   │   │    (Go)      │
+              │               │   │               │   │              │
+              │  API REST     │   │  Temps réel   │   │  GPS ingest  │
+              │  principale   │   │  événements   │   │  + storage   │
+              └───────┬───────┘   └───────┬───────┘   └──────┬───────┘
+                      │                   │                   │
+              ┌───────▼───────────────────▼───────────────────▼───────┐
+              │                    Données                             │
+              │   PostgreSQL          Redis            TimescaleDB     │
+              │   (données métier)    (cache/sessions) (positions GPS) │
+              └────────────────────────────────────────────────────────┘
+```
+
+## Flux de données principaux
+
+### 1. Création et dispatch d'une mission
+
+```
+Dashboard → dk-backend → PostgreSQL
+dk-backend → dk-sse (publish event) → App Mobile (notification SSE)
+dk-backend → Push Notifications (FCM/APNs) → App Mobile
+```
+
+### 2. Tracking GPS en temps réel
+
+```
+App Mobile → dk-positions (POST /positions)
+dk-positions → TimescaleDB (persist)
+dk-positions → Redis (latest position cache)
+dk-positions → dk-sse (publish position.updated)
+dk-sse → Dashboard Web (SSE stream)
+```
+
+### 3. Mise à jour de statut mission
+
+```
+App Mobile → dk-backend (PATCH /missions/{id}/status)
+dk-backend → PostgreSQL (update)
+dk-backend → dk-sse (publish mission.status_changed)
+dk-sse → Dashboard + App Client (SSE stream)
+```
+
+## Choix technologiques
+
+### Pourquoi Go pour le backend ?
+
+- **Performance** : gestion native de la concurrence avec les goroutines
+- **Faible empreinte mémoire** : crucial pour un service de positions à haute fréquence
+- **Typage fort** : prévention des bugs à la compilation
+- **Déploiement simple** : binaire statique sans dépendances runtime
+
+### Pourquoi SSE plutôt que WebSocket ?
+
+- **Simplicité** : protocole HTTP standard, pas besoin de handshake
+- **Reconnexion automatique** : gérée nativement par les navigateurs
+- **Unidirectionnel** : suffisant pour notre cas d'usage (serveur → client)
+- **Scalabilité** : plus facile à load-balancer qu'un WebSocket full-duplex
+
+### Pourquoi TimescaleDB pour les positions ?
+
+- **Extension PostgreSQL** : même stack que le reste, pas de nouvelle technologie
+- **Hypertables** : partitionnement automatique par temps pour des requêtes rapides
+- **Compression** : réduction significative du stockage pour les séries temporelles
+- **Rétention automatique** : suppression des positions anciennes via des politiques de rétention
+
+## Scalabilité
+
+Les services sont conçus pour être scalés horizontalement :
+
+- **dk-backend** : stateless, scalable à l'infini derrière un load balancer
+- **dk-sse** : utilise Redis pub/sub pour partager les événements entre instances
+- **dk-positions** : ingestion haute fréquence, scalable avec partitionnement par opérateur
+
+## Déploiement
+
+L'infrastructure est gérée via Terraform et déployée sur Kubernetes. Consultez le projet `dk-infra` pour les détails d'infrastructure.
+
+<Card title="Services détaillés" icon="server" href="/architecture/services">
+  Description détaillée de chaque service : responsabilités, API interne, dépendances.
+</Card>

@@ -1,0 +1,123 @@
+---
+title: Concepts clés
+description: Comprenez le modèle de données de DispatchKit — organisations, opérateurs, missions, clients et zones.
+---
+
+## Concepts clés
+
+Cette page décrit les entités fondamentales de DispatchKit et leurs relations. Comprendre ces concepts est essentiel pour utiliser l'API et configurer la plateforme correctement.
+
+## Organisations
+
+Une **organisation** est l'entité racine dans DispatchKit. Toutes les données (opérateurs, missions, clients) appartiennent à une organisation.
+
+- Un utilisateur peut appartenir à **plusieurs organisations** avec des rôles différents dans chacune
+- Les données sont **strictement isolées** entre organisations — aucun opérateur ni aucune mission n'est partagé
+- L'organisation est créée automatiquement lors de l'inscription
+
+<Info>
+  Pour gérer plusieurs entités (filiales, agences régionales), utilisez la fonctionnalité [multi-organisations](/guides/multi-org).
+</Info>
+
+## Opérateurs
+
+Un **opérateur** est un membre terrain de votre organisation. Il utilise l'application mobile DispatchKit pour :
+
+- Recevoir et accepter des missions
+- Mettre à jour son statut de disponibilité
+- Envoyer sa position GPS en continu
+- Compléter les missions avec preuve (photo, signature)
+
+### Statuts d'un opérateur
+
+| Statut | Description |
+|--------|-------------|
+| `available` | Connecté à l'app, prêt à recevoir des missions |
+| `on_mission` | En cours d'exécution d'une mission assignée |
+| `unavailable` | Déconnecté ou en pause |
+
+## Missions
+
+Une **mission** est l'unité de travail centrale dans DispatchKit. Elle représente une tâche à effectuer par un opérateur sur le terrain.
+
+### Cycle de vie d'une mission
+
+```
+PENDING → ASSIGNED → IN_PROGRESS → ON_SITE → COMPLETED
+                                             ↘ CANCELLED
+```
+
+<AccordionGroup>
+  <Accordion title="PENDING — En attente">
+    La mission a été créée mais n'est pas encore assignée à un opérateur. Elle reste dans la file d'attente jusqu'à l'assignation manuelle ou via l'API.
+  </Accordion>
+  <Accordion title="ASSIGNED — Assignée">
+    Un opérateur a été désigné pour cette mission. Il a reçu une notification push. La mission n'a pas encore démarré.
+  </Accordion>
+  <Accordion title="IN_PROGRESS — En route">
+    L'opérateur a accepté la mission et est en déplacement vers le lieu d'intervention. Son GPS est actif et transmis en temps réel.
+  </Accordion>
+  <Accordion title="ON_SITE — Sur place">
+    L'opérateur est arrivé sur le lieu de la mission. L'heure d'arrivée est enregistrée automatiquement.
+  </Accordion>
+  <Accordion title="COMPLETED — Terminée">
+    La mission est terminée. Un reçu de complétion peut inclure : horodatage, notes, photos, signature client.
+  </Accordion>
+  <Accordion title="CANCELLED — Annulée">
+    La mission a été annulée, soit par le dispatcher, soit par l'opérateur avec une raison. Les missions annulées sont conservées pour audit.
+  </Accordion>
+</AccordionGroup>
+
+### Champs d'une mission
+
+```json
+{
+  "id": "mis_01J5X...",
+  "title": "Livraison Rue de la Paix",
+  "status": "IN_PROGRESS",
+  "origin_address": "12 Rue Beaubourg, Paris",
+  "destination_address": "8 Rue de la Paix, Paris",
+  "operator_id": "usr_01J5X...",
+  "client_id": "cli_01J5X...",
+  "organization_id": "org_01J5X...",
+  "scheduled_at": "2024-01-15T10:00:00Z",
+  "started_at": "2024-01-15T10:05:00Z",
+  "completed_at": null,
+  "created_at": "2024-01-15T09:00:00Z"
+}
+```
+
+## Clients
+
+Un **client** est une entreprise ou un particulier pour lequel des missions sont créées. Les clients peuvent :
+
+- Avoir un accès en lecture à leurs missions via le portail client
+- Recevoir des notifications automatiques (email, SMS) sur l'avancement
+- Consulter les reçus de complétion
+
+<Note>
+  Les clients ne sont pas des utilisateurs de l'organisation — ils ont leur propre espace de connexion distinct du dashboard principal.
+</Note>
+
+## Zones
+
+Les **zones** sont des périmètres géographiques définis pour organiser les interventions. Elles permettent de :
+
+- Filtrer les missions par zone géographique
+- Attribuer automatiquement des opérateurs de la même zone
+- Générer des rapports d'activité par secteur
+
+Une zone est définie par un polygone GeoJSON stocké dans la plateforme.
+
+## Relations entre entités
+
+```
+Organisation
+├── Membres (Owner, Admin, Manager, Operator)
+├── Clients
+├── Opérateurs (subset des membres)
+├── Missions
+│   ├── → Assignée à un Opérateur
+│   └── → Liée à un Client
+└── Zones
+```

@@ -1,0 +1,67 @@
+---
+title: Compléter une mission
+description: Marque une mission comme terminée avec un reçu de complétion.
+---
+
+## POST /missions/{id}/complete
+
+Marque une mission comme `COMPLETED`. Cet endpoint est principalement appelé par l'application mobile de l'opérateur. Il peut aussi être appelé par un dispatcher pour forcer la complétion.
+
+### Path params
+
+<ParamField path="id" type="string" required>
+  Identifiant de la mission à compléter. Doit être au statut `IN_PROGRESS` ou `ON_SITE`.
+</ParamField>
+
+### Body
+
+<ParamField body="notes" type="string">
+  Notes de complétion de l'opérateur (observations, incidents, etc.). Max 2000 caractères.
+</ParamField>
+
+<ParamField body="photos" type="array">
+  URLs des photos de preuve uploadées via l'API d'upload. Max 5 photos.
+</ParamField>
+
+<ParamField body="signature_url" type="string">
+  URL de l'image de signature du client, uploadée via l'API d'upload.
+</ParamField>
+
+### Exemple de requête
+
+```bash
+curl -X POST https://api.dispatchkit.io/api/v1/missions/mis_01J5XKTY4H3GNQV2/complete \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "notes": "Livraison effectuée sans incident. Client satisfait.",
+    "photos": [
+      "https://cdn.dispatchkit.io/uploads/photo-abc123.jpg"
+    ],
+    "signature_url": "https://cdn.dispatchkit.io/uploads/signature-def456.png"
+  }'
+```
+
+### Réponse `200 OK`
+
+```json
+{
+  "id": "mis_01J5XKTY4H3GNQV2",
+  "status": "COMPLETED",
+  "completed_at": "2024-01-15T10:45:00Z",
+  "receipt": {
+    "notes": "Livraison effectuée sans incident. Client satisfait.",
+    "photos": [
+      "https://cdn.dispatchkit.io/receipts/mis_01J5X.../photo-1.jpg"
+    ],
+    "signature_url": "https://cdn.dispatchkit.io/receipts/mis_01J5X.../signature.png"
+  }
+}
+```
+
+### Erreurs
+
+| Code HTTP | Code erreur | Description |
+|-----------|-------------|-------------|
+| `403` | `NOT_ASSIGNED_OPERATOR` | Seul l'opérateur assigné peut compléter la mission |
+| `422` | `INVALID_MISSION_STATUS` | La mission n'est pas dans un statut complétable |

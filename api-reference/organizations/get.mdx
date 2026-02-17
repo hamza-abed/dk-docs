@@ -1,0 +1,38 @@
+---
+title: Récupérer une organisation
+description: Retourne les détails d'une organisation.
+---
+
+## GET /organizations/{id}
+
+Retourne les détails d'une organisation. L'utilisateur doit être membre de l'organisation.
+
+### Path params
+
+<ParamField path="id" type="string" required>
+  Identifiant unique de l'organisation.
+</ParamField>
+
+### Exemple de requête
+
+```bash
+curl https://api.dispatchkit.io/api/v1/organizations/org_01J5XKTY4H3GNQV2 \
+  -H "Authorization: Bearer {token}"
+```
+
+### Réponse
+
+```json
+{
+  "id": "org_01J5XKTY4H3GNQV2",
+  "name": "Transport Dupont SAS",
+  "slug": "transport-dupont-sas",
+  "stats": {
+    "operators_count": 10,
+    "clients_count": 45,
+    "missions_today": 23,
+    "missions_this_month": 312
+  },
+  "created_at": "2024-01-01T00:00:00Z"
+}
+```

@@ -1,0 +1,83 @@
+---
+title: Créer une mission
+description: Crée une nouvelle mission dans l'organisation.
+---
+
+## POST /missions
+
+Crée une nouvelle mission avec le statut `PENDING`. La mission peut être assignée à un opérateur dès la création ou assignée ultérieurement.
+
+### Body
+
+<ParamField body="title" type="string" required>
+  Titre descriptif de la mission (max 200 caractères).
+</ParamField>
+
+<ParamField body="origin_address" type="string" required>
+  Adresse de départ ou de collecte (adresse postale complète).
+</ParamField>
+
+<ParamField body="destination_address" type="string" required>
+  Adresse de destination finale (adresse postale complète).
+</ParamField>
+
+<ParamField body="client_id" type="string" required>
+  Identifiant du client destinataire de la mission.
+</ParamField>
+
+<ParamField body="operator_id" type="string">
+  Identifiant de l'opérateur à qui assigner la mission immédiatement. Si omis, la mission est créée avec le statut `PENDING`.
+</ParamField>
+
+<ParamField body="scheduled_at" type="string">
+  Date et heure planifiée de début de mission au format ISO 8601.
+</ParamField>
+
+<ParamField body="notes" type="string">
+  Notes internes pour l'opérateur (instructions spéciales, code d'accès, etc.). Max 1000 caractères.
+</ParamField>
+
+### Exemple de requête
+
+```bash
+curl -X POST https://api.dispatchkit.io/api/v1/missions \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Livraison urgent Rue de la Paix",
+    "origin_address": "12 Rue Beaubourg, 75004 Paris",
+    "destination_address": "8 Rue de la Paix, 75001 Paris",
+    "client_id": "cli_01J5XKTY4H3GNQV2",
+    "operator_id": "usr_01J5XKTY4H3GNQV2",
+    "scheduled_at": "2024-01-15T10:00:00Z",
+    "notes": "Code porte : 1234"
+  }'
+```
+
+### Réponse `201 Created`
+
+```json
+{
+  "id": "mis_01J5XKTY4H3GNQV2",
+  "title": "Livraison urgent Rue de la Paix",
+  "status": "ASSIGNED",
+  "origin_address": "12 Rue Beaubourg, 75004 Paris",
+  "destination_address": "8 Rue de la Paix, 75001 Paris",
+  "notes": "Code porte : 1234",
+  "operator": {
+    "id": "usr_01J5XKTY4H3GNQV2",
+    "first_name": "Jean",
+    "last_name": "Dupont"
+  },
+  "client": {
+    "id": "cli_01J5XKTY4H3GNQV2",
+    "name": "Entreprise Martin SA"
+  },
+  "scheduled_at": "2024-01-15T10:00:00Z",
+  "created_at": "2024-01-15T09:00:00Z"
+}
+```
+
+<Note>
+  Si `operator_id` est fourni, la mission est créée avec le statut `ASSIGNED` et l'opérateur reçoit immédiatement une notification push.
+</Note>

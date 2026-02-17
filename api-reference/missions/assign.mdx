@@ -1,0 +1,59 @@
+---
+title: Assigner une mission
+description: Assigne une mission à un opérateur disponible.
+---
+
+## POST /missions/{id}/assign
+
+Assigne une mission `PENDING` à un opérateur. L'opérateur reçoit une notification push et la mission passe au statut `ASSIGNED`.
+
+### Path params
+
+<ParamField path="id" type="string" required>
+  Identifiant de la mission à assigner.
+</ParamField>
+
+### Body
+
+<ParamField body="operator_id" type="string" required>
+  Identifiant de l'opérateur à qui assigner la mission. L'opérateur doit avoir le statut `available`.
+</ParamField>
+
+### Exemple de requête
+
+```bash
+curl -X POST https://api.dispatchkit.io/api/v1/missions/mis_01J5XKTY4H3GNQV2/assign \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "operator_id": "usr_01J5XKTY4H3GNQV2"
+  }'
+```
+
+### Réponse `200 OK`
+
+```json
+{
+  "id": "mis_01J5XKTY4H3GNQV2",
+  "status": "ASSIGNED",
+  "operator": {
+    "id": "usr_01J5XKTY4H3GNQV2",
+    "first_name": "Jean",
+    "last_name": "Dupont"
+  },
+  "assigned_at": "2024-01-15T09:15:00Z"
+}
+```
+
+### Erreurs
+
+| Code HTTP | Code erreur | Description |
+|-----------|-------------|-------------|
+| `404` | `MISSION_NOT_FOUND` | Mission introuvable |
+| `422` | `MISSION_ALREADY_ASSIGNED` | La mission est déjà assignée |
+| `422` | `OPERATOR_NOT_AVAILABLE` | L'opérateur n'est pas disponible (`on_mission` ou `unavailable`) |
+| `422` | `OPERATOR_NOT_IN_ORGANIZATION` | L'opérateur n'appartient pas à cette organisation |
+
+<Note>
+  Pour réassigner une mission déjà `ASSIGNED`, appelez d'abord l'endpoint de mise à jour pour repasser en `PENDING`, puis réassignez. Une mission `IN_PROGRESS` ou au-delà ne peut pas être réassignée.
+</Note>

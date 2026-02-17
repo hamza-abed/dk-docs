@@ -1,0 +1,78 @@
+---
+title: Profil utilisateur
+description: Retourne les informations de l'utilisateur authentifié.
+---
+
+## GET /auth/me
+
+Retourne le profil de l'utilisateur associé au token JWT fourni. Utile pour vérifier la validité d'un token et récupérer le contexte utilisateur au démarrage de l'application.
+
+### Headers
+
+<ParamField header="Authorization" type="string" required>
+  `Bearer {token}`
+</ParamField>
+
+### Exemple de requête
+
+```bash
+curl https://api.dispatchkit.io/api/v1/auth/me \
+  -H "Authorization: Bearer {token}"
+```
+
+### Réponse
+
+<ResponseField name="id" type="string">
+  Identifiant unique de l'utilisateur.
+</ResponseField>
+
+<ResponseField name="email" type="string">
+  Adresse email de l'utilisateur.
+</ResponseField>
+
+<ResponseField name="first_name" type="string">
+  Prénom.
+</ResponseField>
+
+<ResponseField name="last_name" type="string">
+  Nom de famille.
+</ResponseField>
+
+<ResponseField name="organizations" type="array">
+  Liste des organisations auxquelles l'utilisateur appartient.
+
+  <Expandable title="Champs d'une organisation">
+    <ResponseField name="id" type="string">Identifiant de l'organisation.</ResponseField>
+    <ResponseField name="name" type="string">Nom de l'organisation.</ResponseField>
+    <ResponseField name="role" type="string">Rôle de l'utilisateur : `owner`, `admin`, `manager`, `operator`.</ResponseField>
+    <ResponseField name="current" type="boolean">Indique si c'est l'organisation active du token courant.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  Date de création du compte au format ISO 8601.
+</ResponseField>
+
+```json
+{
+  "id": "usr_01J5XKTY4H3GNQV2",
+  "email": "marie@transport-dupont.fr",
+  "first_name": "Marie",
+  "last_name": "Dupont",
+  "organizations": [
+    {
+      "id": "org_01J5XKTY4H3GNQV2",
+      "name": "Transport Dupont SAS",
+      "role": "owner",
+      "current": true
+    },
+    {
+      "id": "org_01J5XKTY4H3GNQV3",
+      "name": "Transport Dupont Lyon",
+      "role": "admin",
+      "current": false
+    }
+  ],
+  "created_at": "2024-01-01T09:00:00Z"
+}
+```

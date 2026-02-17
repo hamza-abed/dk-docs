@@ -1,0 +1,109 @@
+---
+title: Gestion des opérateurs
+description: Invitez, configurez et suivez vos opérateurs terrain dans DispatchKit.
+---
+
+## Gestion des opérateurs
+
+Les opérateurs sont les membres terrain de votre organisation. Ils utilisent l'application mobile DispatchKit pour recevoir leurs missions et mettre à jour leur statut.
+
+## Inviter un opérateur
+
+<Steps>
+  <Step title="Envoyer l'invitation">
+    Dans le dashboard, allez dans **Équipe → Opérateurs** et cliquez sur **Inviter**.
+
+    Saisissez l'adresse email de l'opérateur. Il recevra un email contenant :
+    - Un lien d'activation de compte
+    - Les liens de téléchargement de l'application mobile (App Store / Google Play)
+
+    Via l'API :
+    ```bash
+    curl -X POST https://api.dispatchkit.io/api/v1/operators/invite \
+      -H "Authorization: Bearer {token}" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "email": "chauffeur@exemple.fr",
+        "first_name": "Jean",
+        "last_name": "Dupont"
+      }'
+    ```
+  </Step>
+  <Step title="Activation par l'opérateur">
+    L'opérateur clique sur le lien d'invitation, crée son mot de passe et télécharge l'application mobile. Son compte est activé et il apparaît dans votre liste avec le statut `unavailable` jusqu'à sa première connexion mobile.
+  </Step>
+  <Step title="Première connexion mobile">
+    Dès que l'opérateur se connecte à l'application mobile, son statut passe à `available`. Il est désormais visible sur la carte et peut recevoir des missions.
+  </Step>
+</Steps>
+
+## Statuts des opérateurs
+
+Les statuts reflètent la disponibilité en temps réel de chaque opérateur.
+
+| Statut | Icône | Description |
+|--------|-------|-------------|
+| `available` | Vert | Connecté à l'app mobile, prêt à recevoir des missions |
+| `on_mission` | Orange | En cours d'exécution d'une mission |
+| `unavailable` | Gris | Déconnecté, en pause ou hors service |
+
+<Note>
+  Le statut `on_mission` est mis à jour automatiquement par la plateforme lors de l'acceptation d'une mission. L'opérateur n'a pas à le gérer manuellement.
+</Note>
+
+## Tracking GPS
+
+Lorsqu'un opérateur est connecté à l'application mobile, sa position GPS est transmise en continu au service de positions de DispatchKit.
+
+- **Fréquence de mise à jour** : toutes les 5 secondes en mode actif
+- **Précision** : dépend du GPS du téléphone (typiquement 3-10 mètres)
+- **Historique** : les positions sont conservées 90 jours
+
+### Consulter la position en temps réel
+
+<Tabs>
+  <Tab title="Dashboard">
+    La carte principale affiche en temps réel tous les opérateurs `available` et `on_mission` avec leur statut coloré. Cliquez sur un opérateur pour voir ses informations et ses missions récentes.
+  </Tab>
+  <Tab title="API">
+    ```bash
+    # Dernière position connue
+    curl https://api.dispatchkit.io/api/v1/operators/{id}/positions/latest \
+      -H "Authorization: Bearer {token}"
+
+    # Historique des positions sur une période
+    curl "https://api.dispatchkit.io/api/v1/operators/{id}/positions?from=2024-01-15T08:00:00Z&to=2024-01-15T18:00:00Z" \
+      -H "Authorization: Bearer {token}"
+    ```
+  </Tab>
+</Tabs>
+
+## Modifier un opérateur
+
+Vous pouvez mettre à jour les informations d'un opérateur (nom, téléphone, numéro de véhicule) depuis le dashboard ou l'API :
+
+```bash
+curl -X PUT https://api.dispatchkit.io/api/v1/operators/{id} \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "first_name": "Jean",
+    "last_name": "Dupont",
+    "phone": "+33612345678",
+    "vehicle_plate": "AB-123-CD"
+  }'
+```
+
+## Application mobile
+
+L'application mobile DispatchKit est disponible sur iOS et Android. Elle permet aux opérateurs de :
+
+- Voir leurs missions assignées avec détails et navigation GPS
+- Accepter ou refuser une mission
+- Mettre à jour les statuts de mission (En route, Sur place, Terminé)
+- Ajouter des photos et la signature client à la complétion
+- Passer en mode pause (statut `unavailable`)
+
+<Tip>
+  Encouragez vos opérateurs à activer les notifications push pour ne jamais manquer une nouvelle assignation.
+</Tip>

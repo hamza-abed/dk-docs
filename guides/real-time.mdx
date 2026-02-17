@@ -1,0 +1,158 @@
+---
+title: Temps réel
+description: Intégrez les événements temps réel de DispatchKit via Server-Sent Events (SSE) et le service de positions GPS.
+---
+
+## Temps réel
+
+DispatchKit diffuse les événements en temps réel via **Server-Sent Events (SSE)**. Ce protocole HTTP unidirectionnel est idéal pour recevoir des mises à jour continues sans polling.
+
+## Connexion au flux SSE
+
+Le service SSE est disponible à l'adresse `https://sse.dispatchkit.io`. L'authentification se fait via le token Bearer dans le header ou en query param.
+
+### Connexion au flux global de l'organisation
+
+```javascript
+const eventSource = new EventSource(
+  'https://sse.dispatchkit.io/stream?token=YOUR_TOKEN'
+);
+
+eventSource.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  console.log('Événement reçu:', data);
+};
+
+eventSource.onerror = (error) => {
+  console.error('Connexion SSE perdue, reconnexion automatique...');
+};
+```
+
+<Note>
+  Le navigateur gère automatiquement la reconnexion SSE en cas de coupure réseau. L'`EventSource` se reconnecte selon l'en-tête `retry` envoyé par le serveur (par défaut 3 secondes).
+</Note>
+
+### Connexion au flux d'une mission spécifique
+
+```javascript
+const eventSource = new EventSource(
+  `https://sse.dispatchkit.io/missions/${missionId}?token=${token}`
+);
+```
+
+## Événements disponibles
+
+### Événements mission
+
+| Type | Description | Payload |
+|------|-------------|---------|
+| `mission.created` | Nouvelle mission créée | `{id, title, status}` |
+| `mission.assigned` | Mission assignée à un opérateur | `{id, operator_id}` |
+| `mission.started` | Opérateur en route | `{id, started_at}` |
+| `mission.on_site` | Opérateur arrivé sur place | `{id, arrived_at}` |
+| `mission.completed` | Mission terminée | `{id, completed_at, receipt}` |
+| `mission.cancelled` | Mission annulée | `{id, reason}` |
+
+### Événements opérateur
+
+| Type | Description | Payload |
+|------|-------------|---------|
+| `operator.connected` | Opérateur connecté à l'app mobile | `{operator_id, status}` |
+| `operator.disconnected` | Opérateur déconnecté | `{operator_id}` |
+| `operator.status_changed` | Changement de statut | `{operator_id, status, previous_status}` |
+
+### Événements position
+
+| Type | Description | Payload |
+|------|-------------|---------|
+| `position.updated` | Nouvelle position GPS reçue | `{operator_id, lat, lng, accuracy, timestamp}` |
+
+## Format des événements SSE
+
+Chaque événement suit le format suivant :
+
+```
+event: mission.completed
+data: {"id":"mis_01J5X...","status":"COMPLETED","completed_at":"2024-01-15T14:32:00Z","receipt":{"notes":"RAS","photos":["https://..."]}}
+
+```
+
+## Positions GPS
+
+### Service de positions
+
+Le service de positions gère l'ingestion et la récupération des coordonnées GPS des opérateurs.
+
+L'application mobile envoie automatiquement des positions toutes les 5 secondes lorsqu'une mission est en cours. Vous pouvez aussi ingérer des positions depuis vos propres devices via l'API :
+
+```bash
+curl -X POST https://api.dispatchkit.io/api/v1/positions \
+  -H "Authorization: Bearer {operator_token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "lat": 48.8566,
+    "lng": 2.3522,
+    "accuracy": 5.0,
+    "heading": 180,
+    "speed": 30.5,
+    "timestamp": "2024-01-15T10:30:00Z"
+  }'
+```
+
+### Récupérer les positions
+
+```bash
+# Dernière position d'un opérateur
+curl https://api.dispatchkit.io/api/v1/operators/{id}/positions/latest \
+  -H "Authorization: Bearer {token}"
+
+# Positions sur une plage de temps
+curl "https://api.dispatchkit.io/api/v1/operators/{id}/positions?from=2024-01-15T08:00:00Z&to=2024-01-15T18:00:00Z" \
+  -H "Authorization: Bearer {token}"
+```
+
+## Intégration React
+
+Voici un exemple d'intégration SSE dans un composant React :
+
+```tsx
+import { useEffect, useState } from 'react';
+
+function MissionTracker({ missionId, token }: { missionId: string; token: string }) {
+  const [status, setStatus] = useState<string>('');
+  const [position, setPosition] = useState<{ lat: number; lng: number } | null>(null);
+
+  useEffect(() => {
+    const es = new EventSource(
+      `https://sse.dispatchkit.io/missions/${missionId}?token=${token}`
+    );
+
+    es.addEventListener('mission.started', (e) => {
+      setStatus('IN_PROGRESS');
+    });
+
+    es.addEventListener('position.updated', (e) => {
+      const data = JSON.parse(e.data);
+      setPosition({ lat: data.lat, lng: data.lng });
+    });
+
+    es.addEventListener('mission.completed', (e) => {
+      setStatus('COMPLETED');
+      es.close();
+    });
+
+    return () => es.close();
+  }, [missionId, token]);
+
+  return (
+    <div>
+      <p>Statut : {status}</p>
+      {position && <p>Position : {position.lat}, {position.lng}</p>}
+    </div>
+  );
+}
+```
+
+<Tip>
+  Fermez toujours l'`EventSource` dans le cleanup de votre `useEffect` pour éviter les fuites mémoire lors du démontage du composant.
+</Tip>

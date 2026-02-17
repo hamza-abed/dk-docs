@@ -1,0 +1,119 @@
+{
+  "$schema": "https://mintlify.com/schema.json",
+  "name": "DispatchKit",
+  "logo": {
+    "dark": "/logo/dark.svg",
+    "light": "/logo/light.svg"
+  },
+  "favicon": "/favicon.svg",
+  "colors": {
+    "primary": "#2563EB",
+    "light": "#60A5FA",
+    "dark": "#1D4ED8",
+    "anchors": {
+      "from": "#2563EB",
+      "to": "#1D4ED8"
+    }
+  },
+  "topbarLinks": [
+    {
+      "name": "Dashboard",
+      "url": "https://app.dispatchkit.io"
+    }
+  ],
+  "topbarCtaButton": {
+    "name": "Commencer",
+    "url": "https://app.dispatchkit.io/register"
+  },
+  "tabs": [
+    {
+      "name": "API Reference",
+      "url": "api-reference"
+    }
+  ],
+  "navigation": [
+    {
+      "group": "Pour commencer",
+      "pages": ["introduction", "quickstart", "concepts"]
+    },
+    {
+      "group": "Guides",
+      "pages": [
+        "guides/missions",
+        "guides/operators",
+        "guides/clients",
+        "guides/real-time",
+        "guides/multi-org"
+      ]
+    },
+    {
+      "group": "Architecture",
+      "pages": [
+        "architecture/overview",
+        "architecture/services"
+      ]
+    },
+    {
+      "group": "API Reference",
+      "pages": ["api-reference/introduction"]
+    },
+    {
+      "group": "Authentification",
+      "pages": [
+        "api-reference/auth/register",
+        "api-reference/auth/login",
+        "api-reference/auth/refresh",
+        "api-reference/auth/me"
+      ]
+    },
+    {
+      "group": "Missions",
+      "pages": [
+        "api-reference/missions/list",
+        "api-reference/missions/create",
+        "api-reference/missions/get",
+        "api-reference/missions/update",
+        "api-reference/missions/assign",
+        "api-reference/missions/complete"
+      ]
+    },
+    {
+      "group": "Opérateurs",
+      "pages": [
+        "api-reference/operators/list",
+        "api-reference/operators/invite",
+        "api-reference/operators/get",
+        "api-reference/operators/update",
+        "api-reference/operators/positions"
+      ]
+    },
+    {
+      "group": "Clients",
+      "pages": [
+        "api-reference/clients/list",
+        "api-reference/clients/create",
+        "api-reference/clients/get",
+        "api-reference/clients/update"
+      ]
+    },
+    {
+      "group": "Organisations",
+      "pages": [
+        "api-reference/organizations/list",
+        "api-reference/organizations/get",
+        "api-reference/organizations/members",
+        "api-reference/organizations/switch"
+      ]
+    },
+    {
+      "group": "Temps réel",
+      "pages": [
+        "api-reference/real-time/sse",
+        "api-reference/real-time/positions"
+      ]
+    }
+  ],
+  "footerSocials": {
+    "github": "https://github.com/hamza-abed"
+  }
+}
