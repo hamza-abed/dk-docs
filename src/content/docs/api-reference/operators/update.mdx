@@ -1,0 +1,49 @@
+---
+title: Mettre à jour un opérateur
+description: Modifie les informations d'un opérateur.
+---
+
+## PUT /operators/`{id}`
+
+Met à jour les informations d'un opérateur. Seuls les managers, admins et owners peuvent modifier les opérateurs.
+
+### Path params
+
+| Paramètre | Type | Requis | Description |
+|-----------|------|--------|-------------|
+| `id` | string | Oui | Identifiant unique de l'opérateur. |
+
+### Body
+
+| Paramètre | Type | Description |
+|-----------|------|-------------|
+| `first_name` | string | Prénom de l'opérateur. |
+| `last_name` | string | Nom de famille de l'opérateur. |
+| `phone` | string | Numéro de téléphone au format international. |
+| `vehicle_plate` | string | Numéro d'immatriculation du véhicule. |
+
+### Exemple de requête
+
+```bash
+curl -X PUT https://api.dispatchkit.io/api/v1/operators/usr_01J5XKTY4H3GNQV2 \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "phone": "+33698765432",
+    "vehicle_plate": "ZY-987-AB"
+  }'
+```
+
+### Réponse
+
+```json
+{
+  "id": "usr_01J5XKTY4H3GNQV2",
+  "first_name": "Jean",
+  "last_name": "Dupont",
+  "email": "jean.dupont@transport-dupont.fr",
+  "phone": "+33698765432",
+  "vehicle_plate": "ZY-987-AB",
+  "updated_at": "2024-01-15T11:00:00Z"
+}
+```

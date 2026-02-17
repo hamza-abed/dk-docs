@@ -1,0 +1,66 @@
+---
+title: Connexion
+description: Authentifie un utilisateur et retourne un token JWT.
+---
+
+## POST /auth/login
+
+Authentifie un utilisateur avec ses identifiants et retourne un token JWT à utiliser dans les prochaines requêtes.
+
+### Body
+
+| Paramètre | Type | Requis | Description |
+|-----------|------|--------|-------------|
+| `email` | string | Oui | Adresse email de l'utilisateur. |
+| `password` | string | Oui | Mot de passe du compte. |
+
+### Exemple de requête
+
+```bash
+curl -X POST https://api.dispatchkit.io/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "marie@transport-dupont.fr",
+    "password": "MotDePasse2024!"
+  }'
+```
+
+### Réponse
+
+| Champ | Type | Description |
+|-------|------|-------------|
+| `token` | string | Token JWT valable 24 heures. |
+| `refresh_token` | string | Token de renouvellement valable 30 jours. |
+| `user` | object | Informations de l'utilisateur. |
+| `user.id` | string | Identifiant unique de l'utilisateur. |
+| `user.email` | string | Adresse email. |
+| `user.first_name` | string | Prénom. |
+| `user.last_name` | string | Nom de famille. |
+| `user.organizations` | array | Liste des organisations auxquelles l'utilisateur appartient, avec son rôle dans chacune. |
+
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refresh_token": "rt_01J5XKTY4H3GNQV2...",
+  "user": {
+    "id": "usr_01J5XKTY4H3GNQV2",
+    "email": "marie@transport-dupont.fr",
+    "first_name": "Marie",
+    "last_name": "Dupont",
+    "organizations": [
+      {
+        "id": "org_01J5XKTY4H3GNQV2",
+        "name": "Transport Dupont SAS",
+        "role": "owner"
+      }
+    ]
+  }
+}
+```
+
+### Erreurs
+
+| Code HTTP | Code erreur | Description |
+|-----------|-------------|-------------|
+| `401` | `INVALID_CREDENTIALS` | Email ou mot de passe incorrect |
+| `403` | `ACCOUNT_SUSPENDED` | Compte suspendu, contactez le support |

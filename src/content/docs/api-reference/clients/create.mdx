@@ -1,0 +1,48 @@
+---
+title: Créer un client
+description: Crée un nouveau client dans l'organisation.
+---
+
+## POST /clients
+
+Crée un nouveau client dans l'organisation active.
+
+### Body
+
+| Paramètre | Type | Requis | Description |
+|-----------|------|--------|-------------|
+| `name` | string | Oui | Nom du client (raison sociale ou nom complet). Max 200 caractères. |
+| `email` | string | Oui | Adresse email du client. Utilisée pour les notifications et l'accès au portail client. |
+| `phone` | string | Non | Numéro de téléphone au format international. |
+| `address` | string | Non | Adresse principale du client (adresse postale complète). |
+| `reference` | string | Non | Code de référence interne pour synchronisation avec votre CRM ou système de facturation. |
+
+### Exemple de requête
+
+```bash
+curl -X POST https://api.dispatchkit.io/api/v1/clients \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Entreprise Martin SA",
+    "email": "contact@martin-sa.fr",
+    "phone": "+33145678900",
+    "address": "15 Avenue des Champs-Élysées, 75008 Paris",
+    "reference": "CLIENT-0042"
+  }'
+```
+
+### Réponse `201 Created`
+
+```json
+{
+  "id": "cli_01J5XKTY4H3GNQV2",
+  "name": "Entreprise Martin SA",
+  "email": "contact@martin-sa.fr",
+  "phone": "+33145678900",
+  "address": "15 Avenue des Champs-Élysées, 75008 Paris",
+  "reference": "CLIENT-0042",
+  "portal_access": false,
+  "created_at": "2024-01-15T09:00:00Z"
+}
+```

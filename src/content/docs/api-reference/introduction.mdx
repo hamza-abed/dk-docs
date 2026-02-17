@@ -1,0 +1,139 @@
+---
+title: Introduction à l'API
+description: Tout ce qu'il faut savoir pour commencer à utiliser l'API REST DispatchKit.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## Introduction à l'API
+
+L'API DispatchKit est une API REST qui retourne des données en JSON. Elle permet d'intégrer toutes les fonctionnalités de la plateforme dans vos outils et systèmes existants.
+
+## Base URL
+
+```
+https://api.dispatchkit.io/api/v1
+```
+
+Toutes les requêtes doivent utiliser HTTPS. Les requêtes HTTP sont automatiquement redirigées.
+
+## Authentification
+
+L'API utilise des **tokens JWT Bearer**. Obtenez un token en appelant l'endpoint de login, puis incluez-le dans le header `Authorization` de chaque requête.
+
+```bash
+curl https://api.dispatchkit.io/api/v1/missions \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIs..."
+```
+
+<Aside type="caution">
+  Les tokens ont une durée de vie de **24 heures**. Utilisez l'endpoint `/auth/refresh` pour renouveler votre token avant expiration sans redemander les identifiants.
+</Aside>
+
+## Format des réponses
+
+Toutes les réponses sont en JSON. Une réponse réussie contient les données directement ou encapsulées dans une clé de ressource.
+
+### Réponse réussie (liste)
+
+```json
+{
+  "missions": [...],
+  "pagination": {
+    "page": 1,
+    "per_page": 20,
+    "total": 156,
+    "total_pages": 8
+  }
+}
+```
+
+### Réponse réussie (ressource unique)
+
+```json
+{
+  "id": "mis_01J5X...",
+  "title": "Livraison Rue de la Paix",
+  "status": "IN_PROGRESS",
+  ...
+}
+```
+
+### Réponse d'erreur
+
+```json
+{
+  "error": {
+    "code": "OPERATOR_NOT_AVAILABLE",
+    "message": "L'opérateur sélectionné n'est pas disponible",
+    "details": {
+      "operator_id": "usr_01J5X...",
+      "current_status": "on_mission"
+    }
+  }
+}
+```
+
+## Codes HTTP
+
+| Code | Signification |
+|------|---------------|
+| `200` | Succès |
+| `201` | Ressource créée |
+| `204` | Succès sans contenu (DELETE) |
+| `400` | Requête invalide (champs manquants ou invalides) |
+| `401` | Token manquant ou invalide |
+| `403` | Permissions insuffisantes |
+| `404` | Ressource introuvable |
+| `422` | Données valides mais règle métier violée |
+| `429` | Rate limit dépassé |
+| `500` | Erreur serveur interne |
+
+## Pagination
+
+Les endpoints qui retournent des listes supportent la pagination via les query params :
+
+| Param | Type | Défaut | Description |
+|-------|------|--------|-------------|
+| `page` | integer | `1` | Numéro de page |
+| `per_page` | integer | `20` | Résultats par page (max 100) |
+
+```bash
+curl "https://api.dispatchkit.io/api/v1/missions?page=2&per_page=50" \
+  -H "Authorization: Bearer {token}"
+```
+
+## Filtres et tri
+
+La plupart des endpoints de liste supportent des filtres spécifiques à la ressource :
+
+```bash
+# Missions en attente assignées à un opérateur
+curl "https://api.dispatchkit.io/api/v1/missions?status=PENDING&operator_id=usr_01J5X..." \
+  -H "Authorization: Bearer {token}"
+```
+
+## Rate limiting
+
+L'API est limitée à **1000 requêtes par minute** par token. Les headers de réponse indiquent votre consommation :
+
+```
+X-RateLimit-Limit: 1000
+X-RateLimit-Remaining: 847
+X-RateLimit-Reset: 1705315200
+```
+
+## Identifiants des ressources
+
+Tous les identifiants sont des **ULID** (Universally Unique Lexicographically Sortable Identifier) préfixés par le type de ressource :
+
+| Ressource | Préfixe | Exemple |
+|-----------|---------|---------|
+| Mission | `mis_` | `mis_01J5XKTY4H3GNQV2` |
+| Utilisateur / Opérateur | `usr_` | `usr_01J5XKTY4H3GNQV2` |
+| Client | `cli_` | `cli_01J5XKTY4H3GNQV2` |
+| Organisation | `org_` | `org_01J5XKTY4H3GNQV2` |
+
+## Versionnement
+
+L'API est versionnée dans l'URL (`/api/v1`). Les changements non rétrocompatibles seront introduits dans une nouvelle version (`/api/v2`) avec une période de dépréciation d'au moins 6 mois.

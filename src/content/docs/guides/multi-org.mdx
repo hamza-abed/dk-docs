@@ -1,0 +1,137 @@
+---
+title: Multi-organisations
+description: Gérez plusieurs entités depuis un seul compte DispatchKit avec des données strictement isolées.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## Multi-organisations
+
+DispatchKit supporte nativement la gestion de plusieurs organisations depuis un même compte utilisateur. Cette fonctionnalité est conçue pour les groupes qui opèrent plusieurs entités distinctes (filiales, agences régionales, clients gérés).
+
+## Concept
+
+Un utilisateur peut appartenir à **plusieurs organisations** avec des rôles différents dans chacune :
+
+- Manager dans "Transport Dupont Paris"
+- Opérateur dans "Transport Dupont Lyon"
+- Owner de "Ma Propre Société"
+
+Les données de chaque organisation sont **strictement isolées** : les opérateurs, missions et clients d'une organisation ne sont pas visibles depuis une autre.
+
+## Rôles disponibles
+
+| Rôle | Permissions |
+|------|-------------|
+| `owner` | Accès total, gestion de l'organisation, facturation |
+| `admin` | Accès total sauf facturation, peut inviter des membres |
+| `manager` | Créer/assigner des missions, inviter des opérateurs |
+| `operator` | Recevoir et compléter ses propres missions uniquement |
+
+<Aside type="note">
+  Le rôle `owner` est unique par organisation et ne peut pas être transféré via l'API — contactez le support pour un transfert de propriété.
+</Aside>
+
+## Créer une nouvelle organisation
+
+Un utilisateur existant peut créer une nouvelle organisation depuis **Paramètres → Organisations → Créer**.
+
+Via l'API :
+
+```bash
+curl -X POST https://api.dispatchkit.io/api/v1/organizations \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Transport Dupont Lyon",
+    "slug": "transport-dupont-lyon"
+  }'
+```
+
+## Switcher d'organisation
+
+### Dashboard
+
+Le sélecteur d'organisation est accessible en haut à gauche du dashboard. Cliquez sur le nom de votre organisation actuelle pour afficher la liste des organisations disponibles et switcher.
+
+### API
+
+Le switch d'organisation via l'API se fait en échangeant votre token actuel contre un token valable pour l'organisation cible :
+
+```bash
+curl -X POST https://api.dispatchkit.io/api/v1/organizations/{org_id}/switch \
+  -H "Authorization: Bearer {current_token}"
+```
+
+Le nouveau token retourné est scopé à l'organisation cible. Toutes les requêtes suivantes avec ce token opèrent dans le contexte de cette organisation.
+
+<Aside type="caution">
+  Le token retourné par `/switch` est valable 24 heures et n'est valide que pour l'organisation sélectionnée. Conservez votre token original pour revenir à l'organisation précédente.
+</Aside>
+
+## Inviter un membre dans une organisation
+
+```bash
+curl -X POST https://api.dispatchkit.io/api/v1/organizations/{org_id}/members \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "manager@exemple.fr",
+    "role": "manager"
+  }'
+```
+
+## Lister les membres d'une organisation
+
+```bash
+curl https://api.dispatchkit.io/api/v1/organizations/{org_id}/members \
+  -H "Authorization: Bearer {token}"
+```
+
+Réponse :
+
+```json
+{
+  "members": [
+    {
+      "id": "usr_01J5X...",
+      "email": "owner@exemple.fr",
+      "first_name": "Marie",
+      "last_name": "Dupont",
+      "role": "owner",
+      "joined_at": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": "usr_01J5Y...",
+      "email": "manager@exemple.fr",
+      "first_name": "Jean",
+      "last_name": "Martin",
+      "role": "manager",
+      "joined_at": "2024-01-10T00:00:00Z"
+    }
+  ]
+}
+```
+
+## Cas d'usage typiques
+
+<details>
+<summary>Groupe avec plusieurs filiales</summary>
+
+Créez une organisation par filiale. Le directeur de groupe est `owner` sur toutes. Chaque directeur régional est `admin` sur sa filiale uniquement.
+
+</details>
+
+<details>
+<summary>Agence gérant des clients</summary>
+
+Créez une organisation par client géré. Les managers de l'agence sont `admin` partout. Les opérateurs de terrain n'appartiennent qu'à la ou les organisations où ils interviennent.
+
+</details>
+
+<details>
+<summary>Développeur intégrant l'API</summary>
+
+Utilisez une organisation de développement distincte de la production. Swappez le token pour cibler l'environnement voulu.
+
+</details>

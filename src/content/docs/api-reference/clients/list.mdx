@@ -1,0 +1,49 @@
+---
+title: Lister les clients
+description: Récupère la liste des clients de l'organisation.
+---
+
+## GET /clients
+
+Retourne la liste paginée des clients de l'organisation active.
+
+### Query params
+
+| Paramètre | Type | Description |
+|-----------|------|-------------|
+| `search` | string | Recherche textuelle sur le nom, l'email ou la référence du client. |
+| `page` | integer | Numéro de page (défaut : `1`). |
+| `per_page` | integer | Résultats par page (défaut : `20`, max : `100`). |
+
+### Exemple de requête
+
+```bash
+curl "https://api.dispatchkit.io/api/v1/clients?search=Martin" \
+  -H "Authorization: Bearer {token}"
+```
+
+### Réponse
+
+```json
+{
+  "clients": [
+    {
+      "id": "cli_01J5XKTY4H3GNQV2",
+      "name": "Entreprise Martin SA",
+      "email": "contact@martin-sa.fr",
+      "phone": "+33145678900",
+      "address": "15 Avenue des Champs-Élysées, 75008 Paris",
+      "reference": "CLIENT-0042",
+      "portal_access": true,
+      "missions_count": 23,
+      "created_at": "2024-01-05T09:00:00Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "per_page": 20,
+    "total": 1,
+    "total_pages": 1
+  }
+}
+```
