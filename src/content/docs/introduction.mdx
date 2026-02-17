@@ -1,0 +1,60 @@
+---
+title: Introduction
+description: DispatchKit — La plateforme de dispatch et gestion de flottes pour les entreprises de transport et logistique.
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+## Bienvenue sur DispatchKit
+
+DispatchKit est une plateforme SaaS conçue pour les entreprises de transport et de logistique qui souhaitent optimiser la gestion de leurs opérations terrain. Elle centralise le dispatch de missions, le suivi GPS en temps réel des opérateurs et la communication entre les équipes.
+
+<CardGrid>
+  <Card title="Dispatch intelligent" icon="rocket">
+    Créez et assignez des missions à vos opérateurs en quelques clics. Visualisez leur disponibilité et leur position en temps réel pour un dispatch optimal.
+  </Card>
+  <Card title="Tracking temps réel" icon="location">
+    Suivez la position de vos opérateurs sur une carte live. Recevez des mises à jour GPS continues via Server-Sent Events sans polling.
+  </Card>
+  <Card title="Multi-organisations" icon="seti:config">
+    Gérez plusieurs entités depuis un seul compte. Switchez entre organisations en un clic, avec des droits et données strictement isolés.
+  </Card>
+  <Card title="Portail client" icon="person">
+    Donnez à vos clients une visibilité sur leurs missions : statut, opérateur assigné, heure d'arrivée estimée et preuve de complétion.
+  </Card>
+</CardGrid>
+
+## À qui s'adresse DispatchKit ?
+
+DispatchKit s'adresse aux entreprises qui orchestrent des opérations terrain :
+
+- **Transporteurs et coursiers** — livraisons, collectes, tournées
+- **Services de maintenance** — interventions techniques sur site
+- **Sociétés de sécurité** — rondes et missions de surveillance
+- **Agences d'interim** — dispatch de personnel mobile
+
+## Architecture de la plateforme
+
+DispatchKit est composé de plusieurs services indépendants qui collaborent :
+
+| Service | Rôle |
+|---------|------|
+| **Dashboard web** | Interface de dispatch pour les managers et admins |
+| **App mobile** | Application React Native pour les opérateurs terrain |
+| **API REST** | Backend Go exposant toutes les ressources |
+| **SSE Service** | Diffusion temps réel des événements vers les clients |
+| **Positions Service** | Ingestion et stockage des positions GPS |
+
+## Prochaines étapes
+
+<CardGrid>
+  <Card title="Démarrage rapide" icon="rocket">
+    Créez votre compte et lancez votre première mission en moins de 5 minutes. [Commencer](/dk-docs/quickstart)
+  </Card>
+  <Card title="Concepts clés" icon="open-book">
+    Comprenez le modèle de données : organisations, missions, opérateurs. [Lire](/dk-docs/concepts)
+  </Card>
+  <Card title="API Reference" icon="laptop">
+    Intégrez DispatchKit dans vos outils existants via l'API REST. [Explorer](/dk-docs/api-reference/introduction)
+  </Card>
+</CardGrid>

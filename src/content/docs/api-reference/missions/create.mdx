@@ -1,0 +1,67 @@
+---
+title: Créer une mission
+description: Crée une nouvelle mission dans l'organisation.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## POST /missions
+
+Crée une nouvelle mission avec le statut `PENDING`. La mission peut être assignée à un opérateur dès la création ou assignée ultérieurement.
+
+### Body
+
+| Paramètre | Type | Requis | Description |
+|-----------|------|--------|-------------|
+| `title` | string | Oui | Titre descriptif de la mission (max 200 caractères). |
+| `origin_address` | string | Oui | Adresse de départ ou de collecte (adresse postale complète). |
+| `destination_address` | string | Oui | Adresse de destination finale (adresse postale complète). |
+| `client_id` | string | Oui | Identifiant du client destinataire de la mission. |
+| `operator_id` | string | Non | Identifiant de l'opérateur à qui assigner la mission immédiatement. Si omis, la mission est créée avec le statut `PENDING`. |
+| `scheduled_at` | string | Non | Date et heure planifiée de début de mission au format ISO 8601. |
+| `notes` | string | Non | Notes internes pour l'opérateur (instructions spéciales, code d'accès, etc.). Max 1000 caractères. |
+
+### Exemple de requête
+
+```bash
+curl -X POST https://api.dispatchkit.io/api/v1/missions \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Livraison urgent Rue de la Paix",
+    "origin_address": "12 Rue Beaubourg, 75004 Paris",
+    "destination_address": "8 Rue de la Paix, 75001 Paris",
+    "client_id": "cli_01J5XKTY4H3GNQV2",
+    "operator_id": "usr_01J5XKTY4H3GNQV2",
+    "scheduled_at": "2024-01-15T10:00:00Z",
+    "notes": "Code porte : 1234"
+  }'
+```
+
+### Réponse `201 Created`
+
+```json
+{
+  "id": "mis_01J5XKTY4H3GNQV2",
+  "title": "Livraison urgent Rue de la Paix",
+  "status": "ASSIGNED",
+  "origin_address": "12 Rue Beaubourg, 75004 Paris",
+  "destination_address": "8 Rue de la Paix, 75001 Paris",
+  "notes": "Code porte : 1234",
+  "operator": {
+    "id": "usr_01J5XKTY4H3GNQV2",
+    "first_name": "Jean",
+    "last_name": "Dupont"
+  },
+  "client": {
+    "id": "cli_01J5XKTY4H3GNQV2",
+    "name": "Entreprise Martin SA"
+  },
+  "scheduled_at": "2024-01-15T10:00:00Z",
+  "created_at": "2024-01-15T09:00:00Z"
+}
+```
+
+<Aside type="note">
+  Si `operator_id` est fourni, la mission est créée avec le statut `ASSIGNED` et l'opérateur reçoit immédiatement une notification push.
+</Aside>

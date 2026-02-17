@@ -1,0 +1,80 @@
+---
+title: Membres de l'organisation
+description: Récupère et gère les membres d'une organisation.
+---
+
+## GET /organizations/`{id}`/members
+
+Retourne la liste des membres de l'organisation avec leurs rôles.
+
+### Path params
+
+| Paramètre | Type | Requis | Description |
+|-----------|------|--------|-------------|
+| `id` | string | Oui | Identifiant unique de l'organisation. |
+
+### Exemple de requête
+
+```bash
+curl https://api.dispatchkit.io/api/v1/organizations/org_01J5XKTY4H3GNQV2/members \
+  -H "Authorization: Bearer {token}"
+```
+
+### Réponse
+
+```json
+{
+  "members": [
+    {
+      "id": "usr_01J5XKTY4H3GNQV2",
+      "first_name": "Marie",
+      "last_name": "Dupont",
+      "email": "marie@transport-dupont.fr",
+      "role": "owner",
+      "joined_at": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": "usr_01J5XKTY4H3GNQV3",
+      "first_name": "Jean",
+      "last_name": "Martin",
+      "email": "jean@transport-dupont.fr",
+      "role": "manager",
+      "joined_at": "2024-01-10T00:00:00Z"
+    }
+  ]
+}
+```
+
+## POST /organizations/`{id}`/members
+
+Invite un nouvel utilisateur à rejoindre l'organisation avec un rôle défini.
+
+### Body
+
+| Paramètre | Type | Requis | Description |
+|-----------|------|--------|-------------|
+| `email` | string | Oui | Adresse email de la personne à inviter. |
+| `role` | string | Oui | Rôle à attribuer : `admin`, `manager`, ou `operator`. |
+
+### Exemple
+
+```bash
+curl -X POST https://api.dispatchkit.io/api/v1/organizations/org_01J5XKTY4H3GNQV2/members \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "nouveau@transport-dupont.fr",
+    "role": "manager"
+  }'
+```
+
+## DELETE /organizations/`{id}`/members/`{user_id}`
+
+Retire un membre de l'organisation. Seuls les admins et owners peuvent retirer des membres. Un owner ne peut pas se retirer lui-même.
+
+```bash
+curl -X DELETE https://api.dispatchkit.io/api/v1/organizations/org_01J5XKTY4H3GNQV2/members/usr_01J5XKTY4H3GNQV3 \
+  -H "Authorization: Bearer {token}"
+```
+
+Retourne `204 No Content` en cas de succès.

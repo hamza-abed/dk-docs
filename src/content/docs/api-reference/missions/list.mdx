@@ -1,0 +1,62 @@
+---
+title: Lister les missions
+description: Récupère la liste paginée des missions de l'organisation.
+---
+
+## GET /missions
+
+Retourne la liste paginée des missions de l'organisation active. Supporte le filtrage par statut, opérateur, client et date.
+
+### Query params
+
+| Paramètre | Type | Description |
+|-----------|------|-------------|
+| `status` | string | Filtre par statut. Valeurs : `PENDING`, `ASSIGNED`, `IN_PROGRESS`, `ON_SITE`, `COMPLETED`, `CANCELLED`. Peut être répété pour filtrer sur plusieurs statuts : `?status=PENDING&status=ASSIGNED`. |
+| `operator_id` | string | Filtre les missions assignées à un opérateur spécifique. |
+| `client_id` | string | Filtre les missions d'un client spécifique. |
+| `from` | string | Date de début au format ISO 8601. Filtre sur `created_at`. |
+| `to` | string | Date de fin au format ISO 8601. Filtre sur `created_at`. |
+| `page` | integer | Numéro de page (défaut : `1`). |
+| `per_page` | integer | Résultats par page (défaut : `20`, max : `100`). |
+
+### Exemple de requête
+
+```bash
+# Missions en cours aujourd'hui
+curl "https://api.dispatchkit.io/api/v1/missions?status=IN_PROGRESS&status=ON_SITE&from=2024-01-15T00:00:00Z" \
+  -H "Authorization: Bearer {token}"
+```
+
+### Réponse
+
+```json
+{
+  "missions": [
+    {
+      "id": "mis_01J5XKTY4H3GNQV2",
+      "title": "Livraison Rue de la Paix",
+      "status": "IN_PROGRESS",
+      "origin_address": "12 Rue Beaubourg, 75004 Paris",
+      "destination_address": "8 Rue de la Paix, 75001 Paris",
+      "operator": {
+        "id": "usr_01J5XKTY4H3GNQV2",
+        "first_name": "Jean",
+        "last_name": "Dupont"
+      },
+      "client": {
+        "id": "cli_01J5XKTY4H3GNQV2",
+        "name": "Entreprise Martin SA"
+      },
+      "scheduled_at": "2024-01-15T10:00:00Z",
+      "started_at": "2024-01-15T10:05:00Z",
+      "created_at": "2024-01-15T09:00:00Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "per_page": 20,
+    "total": 47,
+    "total_pages": 3
+  }
+}
+```

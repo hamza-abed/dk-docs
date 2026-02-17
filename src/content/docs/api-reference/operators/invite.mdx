@@ -1,0 +1,60 @@
+---
+title: Inviter un opérateur
+description: Envoie une invitation à un opérateur pour rejoindre l'organisation.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## POST /operators/invite
+
+Envoie un email d'invitation à un opérateur pour rejoindre l'organisation. L'opérateur reçoit un lien pour créer son compte et télécharger l'application mobile.
+
+### Body
+
+| Paramètre | Type | Requis | Description |
+|-----------|------|--------|-------------|
+| `email` | string | Oui | Adresse email de l'opérateur à inviter. |
+| `first_name` | string | Oui | Prénom de l'opérateur. |
+| `last_name` | string | Oui | Nom de famille de l'opérateur. |
+| `phone` | string | Non | Numéro de téléphone (format international, ex. : `+33612345678`). |
+| `vehicle_plate` | string | Non | Numéro d'immatriculation du véhicule (optionnel). |
+
+### Exemple de requête
+
+```bash
+curl -X POST https://api.dispatchkit.io/api/v1/operators/invite \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "jean.dupont@exemple.fr",
+    "first_name": "Jean",
+    "last_name": "Dupont",
+    "phone": "+33612345678",
+    "vehicle_plate": "AB-123-CD"
+  }'
+```
+
+### Réponse `201 Created`
+
+```json
+{
+  "id": "usr_01J5XKTY4H3GNQV2",
+  "email": "jean.dupont@exemple.fr",
+  "first_name": "Jean",
+  "last_name": "Dupont",
+  "status": "unavailable",
+  "invitation_status": "pending",
+  "invited_at": "2024-01-15T09:00:00Z"
+}
+```
+
+<Aside type="note">
+  Si l'email correspond à un compte DispatchKit existant, l'utilisateur est directement ajouté à l'organisation sans qu'un email soit envoyé.
+</Aside>
+
+### Erreurs
+
+| Code HTTP | Code erreur | Description |
+|-----------|-------------|-------------|
+| `409` | `OPERATOR_ALREADY_IN_ORGANIZATION` | Cet email est déjà membre de l'organisation |
+| `422` | `INVITATION_ALREADY_PENDING` | Une invitation est déjà en attente pour cet email |

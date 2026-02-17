@@ -1,0 +1,50 @@
+---
+title: Mettre à jour un client
+description: Modifie les informations d'un client existant.
+---
+
+## PUT /clients/`{id}`
+
+Met à jour les informations d'un client. Seuls les champs fournis sont modifiés.
+
+### Path params
+
+| Paramètre | Type | Requis | Description |
+|-----------|------|--------|-------------|
+| `id` | string | Oui | Identifiant unique du client. |
+
+### Body
+
+| Paramètre | Type | Description |
+|-----------|------|-------------|
+| `name` | string | Nouveau nom du client. |
+| `email` | string | Nouvelle adresse email. |
+| `phone` | string | Nouveau numéro de téléphone. |
+| `address` | string | Nouvelle adresse principale. |
+| `reference` | string | Nouveau code de référence interne. |
+
+### Exemple de requête
+
+```bash
+curl -X PUT https://api.dispatchkit.io/api/v1/clients/cli_01J5XKTY4H3GNQV2 \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Entreprise Martin & Fils SA",
+    "phone": "+33145678901"
+  }'
+```
+
+### Réponse
+
+```json
+{
+  "id": "cli_01J5XKTY4H3GNQV2",
+  "name": "Entreprise Martin & Fils SA",
+  "email": "contact@martin-sa.fr",
+  "phone": "+33145678901",
+  "address": "15 Avenue des Champs-Élysées, 75008 Paris",
+  "reference": "CLIENT-0042",
+  "updated_at": "2024-01-15T11:30:00Z"
+}
+```

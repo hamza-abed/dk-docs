@@ -1,0 +1,91 @@
+---
+title: Positions GPS
+description: Ingérez et récupérez les positions GPS des opérateurs via le service de positions.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## Positions GPS
+
+Le service de positions gère l'ingestion haute fréquence des coordonnées GPS des opérateurs. Il est appelé directement par l'application mobile et peut aussi être utilisé pour intégrer des devices GPS tiers.
+
+**Base URL positions** : `https://api.dispatchkit.io/api/v1`
+
+## POST /positions
+
+Ingère une nouvelle position GPS pour l'opérateur authentifié. Cet endpoint est principalement appelé par l'application mobile toutes les 5 secondes.
+
+### Body
+
+| Paramètre | Type | Requis | Description |
+|-----------|------|--------|-------------|
+| `lat` | number | Oui | Latitude en degrés décimaux (ex. : `48.8566`). |
+| `lng` | number | Oui | Longitude en degrés décimaux (ex. : `2.3522`). |
+| `accuracy` | number | Non | Précision GPS en mètres. |
+| `heading` | number | Non | Direction en degrés (0-360, 0 = Nord). |
+| `speed` | number | Non | Vitesse en km/h. |
+| `timestamp` | string | Oui | Horodatage de la mesure au format ISO 8601. Doit être dans les 60 dernières secondes. |
+
+### Exemple de requête
+
+```bash
+curl -X POST https://api.dispatchkit.io/api/v1/positions \
+  -H "Authorization: Bearer {operator_token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "lat": 48.8566,
+    "lng": 2.3522,
+    "accuracy": 4.5,
+    "heading": 270,
+    "speed": 35.2,
+    "timestamp": "2024-01-15T10:30:00Z"
+  }'
+```
+
+### Réponse `204 No Content`
+
+Aucun corps de réponse. La position a été enregistrée et diffusée via SSE.
+
+<Aside type="note">
+  Le timestamp doit être dans les **60 dernières secondes**. Les positions trop anciennes sont rejetées avec un `422` pour éviter les rejeux accidentels.
+</Aside>
+
+## POST /positions/batch
+
+Ingère plusieurs positions en une seule requête. Utile pour rattraper des positions accumulées hors ligne.
+
+```bash
+curl -X POST https://api.dispatchkit.io/api/v1/positions/batch \
+  -H "Authorization: Bearer {operator_token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "positions": [
+      {
+        "lat": 48.8560,
+        "lng": 2.3518,
+        "timestamp": "2024-01-15T10:29:45Z"
+      },
+      {
+        "lat": 48.8563,
+        "lng": 2.3520,
+        "timestamp": "2024-01-15T10:29:50Z"
+      },
+      {
+        "lat": 48.8566,
+        "lng": 2.3522,
+        "timestamp": "2024-01-15T10:29:55Z"
+      }
+    ]
+  }'
+```
+
+Maximum 100 positions par batch. Les positions plus anciennes que 24 heures sont acceptées dans le batch mais ne sont pas diffusées via SSE.
+
+### Réponse `200 OK`
+
+```json
+{
+  "inserted": 3,
+  "rejected": 0
+}
+```

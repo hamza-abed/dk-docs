@@ -1,12 +1,15 @@
 {
   "name": "dk-docs",
   "version": "1.0.0",
-  "description": "Documentation publique de DispatchKit",
+  "private": true,
   "scripts": {
-    "dev": "mintlify dev",
-    "build": "mintlify build"
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
   },
-  "devDependencies": {
-    "mintlify": "^4.0.0"
+  "dependencies": {
+    "@astrojs/starlight": "^0.32",
+    "astro": "^5.2",
+    "sharp": "^0.33"
   }
 }

@@ -1,0 +1,86 @@
+---
+title: Server-Sent Events
+description: Connectez-vous au flux SSE pour recevoir les événements en temps réel.
+---
+
+## SSE — Flux temps réel
+
+Le service SSE de DispatchKit expose des flux d'événements temps réel pour les missions et les opérateurs de votre organisation.
+
+**Base URL SSE** : `https://sse.dispatchkit.io`
+
+## GET /stream
+
+Connexion au flux global de l'organisation. Reçoit tous les événements (missions, opérateurs, positions) de l'organisation active du token.
+
+### Headers
+
+| Header | Type | Description |
+|--------|------|-------------|
+| `Authorization` | string | `Bearer {token}` — Alternative au query param `token`. |
+| `Accept` | string | Doit être `text/event-stream`. |
+
+### Query params
+
+| Paramètre | Type | Description |
+|-----------|------|-------------|
+| `token` | string | Token JWT en alternative au header Authorization (utile avec `EventSource` navigateur qui ne supporte pas les headers custom). |
+
+### Exemple de connexion
+
+```javascript
+// Option 1 : query param (EventSource navigateur)
+const es = new EventSource(
+  `https://sse.dispatchkit.io/stream?token=${token}`
+);
+
+// Option 2 : header (fetch ou bibliothèques SSE)
+const es = new EventSourcePolyfill(
+  'https://sse.dispatchkit.io/stream',
+  { headers: { Authorization: `Bearer ${token}` } }
+);
+```
+
+### Format du flux
+
+```
+event: mission.assigned
+id: evt_01J5XKTY4H3GNQV2
+data: {"mission_id":"mis_01J5X...","operator_id":"usr_01J5X...","assigned_at":"2024-01-15T10:00:00Z"}
+
+event: position.updated
+id: evt_01J5XKTY4H3GNQV3
+data: {"operator_id":"usr_01J5X...","lat":48.8566,"lng":2.3522,"timestamp":"2024-01-15T10:00:05Z"}
+
+```
+
+### Reconnexion et replay
+
+Le serveur envoie régulièrement un commentaire heartbeat `:` toutes les 30 secondes pour maintenir la connexion. En cas de déconnexion, le navigateur se reconnecte automatiquement. Passez l'ID du dernier événement reçu dans le header `Last-Event-ID` pour recevoir les événements manqués (rétention de 5 minutes) :
+
+```javascript
+const es = new EventSourcePolyfill(
+  `https://sse.dispatchkit.io/stream?token=${token}`,
+  { headers: { 'Last-Event-ID': lastEventId } }
+);
+```
+
+## GET /missions/`{id}`
+
+Connexion au flux d'une mission spécifique. Reçoit uniquement les événements relatifs à cette mission.
+
+```
+GET https://sse.dispatchkit.io/missions/{mission_id}?token={token}
+Accept: text/event-stream
+```
+
+Événements reçus : `mission.started`, `mission.on_site`, `mission.completed`, `mission.cancelled`, `position.updated`.
+
+## GET /operators/`{id}`
+
+Connexion au flux d'un opérateur spécifique. Reçoit les événements de statut et les positions de cet opérateur.
+
+```
+GET https://sse.dispatchkit.io/operators/{operator_id}?token={token}
+Accept: text/event-stream
+```

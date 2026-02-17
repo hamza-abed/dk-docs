@@ -1,0 +1,52 @@
+---
+title: Récupérer un opérateur
+description: Retourne le profil complet d'un opérateur.
+---
+
+## GET /operators/`{id}`
+
+Retourne le profil complet d'un opérateur de l'organisation, incluant son statut actuel, sa dernière position et ses statistiques.
+
+### Path params
+
+| Paramètre | Type | Requis | Description |
+|-----------|------|--------|-------------|
+| `id` | string | Oui | Identifiant unique de l'opérateur. |
+
+### Exemple de requête
+
+```bash
+curl https://api.dispatchkit.io/api/v1/operators/usr_01J5XKTY4H3GNQV2 \
+  -H "Authorization: Bearer {token}"
+```
+
+### Réponse
+
+```json
+{
+  "id": "usr_01J5XKTY4H3GNQV2",
+  "first_name": "Jean",
+  "last_name": "Dupont",
+  "email": "jean.dupont@transport-dupont.fr",
+  "phone": "+33612345678",
+  "vehicle_plate": "AB-123-CD",
+  "status": "on_mission",
+  "last_position": {
+    "lat": 48.8647,
+    "lng": 2.3499,
+    "accuracy": 5.2,
+    "updated_at": "2024-01-15T10:32:00Z"
+  },
+  "current_mission": {
+    "id": "mis_01J5XKTY4H3GNQV9",
+    "title": "Livraison Avenue de l'Opéra",
+    "status": "IN_PROGRESS"
+  },
+  "stats": {
+    "missions_completed_today": 3,
+    "missions_completed_this_month": 47,
+    "average_completion_time_minutes": 28
+  },
+  "joined_at": "2024-01-05T09:00:00Z"
+}
+```
