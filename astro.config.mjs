@@ -10,6 +10,11 @@ export default defineConfig({
       social: {
         github: 'https://github.com/hamza-abed',
       },
+      logo: {
+        light: './src/assets/logo-light.svg',
+        dark: './src/assets/logo-dark.svg',
+        alt: 'DispatchKit logo',
+      },
       customCss: ['./src/styles/custom.css'],
       sidebar: [
         {
