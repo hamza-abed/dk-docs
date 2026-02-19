@@ -3,19 +3,20 @@ title: Inscription
 description: Crée un nouveau compte utilisateur et une organisation.
 ---
 
+import { Aside } from '@astrojs/starlight/components';
+
 ## POST /auth/register
 
-Crée un nouveau compte utilisateur. L'utilisateur devient automatiquement `owner` d'une nouvelle organisation créée lors de l'inscription.
+Crée un nouveau compte utilisateur. Une organisation est automatiquement créée lors de l'inscription et l'utilisateur en devient l'administrateur.
 
 ### Body
 
 | Paramètre | Type | Requis | Description |
 |-----------|------|--------|-------------|
 | `email` | string | Oui | Adresse email de l'utilisateur. Doit être unique sur la plateforme. |
-| `password` | string | Oui | Mot de passe. Minimum 8 caractères, doit contenir au moins une majuscule et un chiffre. |
+| `password` | string | Oui | Mot de passe. Minimum 8 caractères. |
 | `first_name` | string | Oui | Prénom de l'utilisateur. |
 | `last_name` | string | Oui | Nom de famille de l'utilisateur. |
-| `organization_name` | string | Oui | Nom de la nouvelle organisation à créer (ex. : "Transport Dupont SAS"). |
 
 ### Exemple de requête
 
@@ -26,36 +27,62 @@ curl -X POST https://api.dispatchkit.io/api/v1/auth/register \
     "email": "marie@transport-dupont.fr",
     "password": "MotDePasse2024!",
     "first_name": "Marie",
-    "last_name": "Dupont",
-    "organization_name": "Transport Dupont SAS"
+    "last_name": "Dupont"
   }'
 ```
 
-### Réponse
+### Réponse `201 Created`
 
 | Champ | Type | Description |
 |-------|------|-------------|
-| `token` | string | Token JWT valable 24 heures pour authentifier les prochaines requêtes. |
-| `refresh_token` | string | Token de renouvellement valable 30 jours. |
+| `access_token` | string | Token JWT pour authentifier les prochaines requêtes. |
+| `refresh_token` | string | Token de renouvellement. |
+| `expires_in` | integer | Durée de validité du `access_token` en secondes. |
 | `user` | object | Informations de l'utilisateur créé. |
-| `user.id` | string | Identifiant unique de l'utilisateur. |
+| `user.id` | string (UUID) | Identifiant unique de l'utilisateur. |
 | `user.email` | string | Adresse email. |
 | `user.first_name` | string | Prénom. |
 | `user.last_name` | string | Nom de famille. |
-| `user.organization_id` | string | ID de l'organisation créée. |
-| `user.role` | string | Rôle dans l'organisation : `owner`. |
+| `user.organization_id` | string (UUID) | ID de l'organisation créée. |
+| `user.role` | string | Rôle dans l'organisation (ex. `admin`). |
+| `operator` | object | Profil opérateur associé à l'utilisateur. |
+| `operator.id` | string (UUID) | Identifiant de l'opérateur. |
+| `operator.first_name` | string | Prénom de l'opérateur. |
+| `operator.last_name` | string | Nom de famille. |
+| `operator.phone` | string | Numéro de téléphone. |
+| `operator.status` | string | Statut de disponibilité (`available`, etc.). |
 
 ```json
 {
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "refresh_token": "rt_01J5XKTY4H3GNQV2...",
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "expires_in": 3600,
   "user": {
-    "id": "usr_01J5XKTY4H3GNQV2",
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
     "email": "marie@transport-dupont.fr",
     "first_name": "Marie",
     "last_name": "Dupont",
-    "organization_id": "org_01J5XKTY4H3GNQV2",
-    "role": "owner"
+    "organization_id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+    "role": "admin"
+  },
+  "operator": {
+    "id": "c3d4e5f6-a7b8-9012-cdef-123456789012",
+    "first_name": "Marie",
+    "last_name": "Dupont",
+    "phone": "",
+    "status": "available",
+    "organization_id": "b2c3d4e5-f6a7-8901-bcde-f12345678901"
   }
 }
 ```
+
+<Aside type="note">
+  `user.role` est actuellement `"admin"` pour tout nouvel inscrit (premier administrateur de l'organisation). Ce champ peut être vide si la relation organisation/opérateur n'est pas encore créée.
+</Aside>
+
+### Erreurs
+
+| Code HTTP | Description |
+|-----------|-------------|
+| `400` | Données invalides (email manquant, mot de passe trop court, etc.) |
+| `409` | Email déjà utilisé |

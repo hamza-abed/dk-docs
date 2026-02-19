@@ -7,19 +7,26 @@ import { Aside } from '@astrojs/starlight/components';
 
 ## POST /missions
 
-Crée une nouvelle mission avec le statut `PENDING`. La mission peut être assignée à un opérateur dès la création ou assignée ultérieurement.
+Crée une nouvelle mission. La mission peut être assignée à un opérateur dès la création ou rester non-assignée.
 
 ### Body
 
 | Paramètre | Type | Requis | Description |
 |-----------|------|--------|-------------|
 | `title` | string | Oui | Titre descriptif de la mission (max 200 caractères). |
-| `origin_address` | string | Oui | Adresse de départ ou de collecte (adresse postale complète). |
-| `destination_address` | string | Oui | Adresse de destination finale (adresse postale complète). |
-| `client_id` | string | Oui | Identifiant du client destinataire de la mission. |
-| `operator_id` | string | Non | Identifiant de l'opérateur à qui assigner la mission immédiatement. Si omis, la mission est créée avec le statut `PENDING`. |
-| `scheduled_at` | string | Non | Date et heure planifiée de début de mission au format ISO 8601. |
-| `notes` | string | Non | Notes internes pour l'opérateur (instructions spéciales, code d'accès, etc.). Max 1000 caractères. |
+| `address_text` | string | Oui | Adresse principale de la mission (adresse postale complète). |
+| `address_lat` | number | Oui | Latitude de l'adresse principale. |
+| `address_lng` | number | Oui | Longitude de l'adresse principale. |
+| `client_id` | string (UUID) | Oui | Identifiant du client destinataire de la mission. |
+| `scheduled_time` | string (ISO 8601) | Oui | Date et heure planifiée de début de mission. |
+| `priority` | string | Oui | Priorité : `low`, `normal` ou `urgent`. |
+| `departure_address_text` | string | Non | Adresse de départ (requise uniquement pour les missions de type Transport). |
+| `departure_address_lat` | number | Non | Latitude de l'adresse de départ. |
+| `departure_address_lng` | number | Non | Longitude de l'adresse de départ. |
+| `operator_id` | string (UUID) | Non | Identifiant de l'opérateur à qui assigner la mission. Si omis, la mission est créée avec le statut `unassigned`. |
+| `description` | string | Non | Description ou notes internes pour l'opérateur (instructions spéciales, code d'accès, etc.). |
+| `estimated_duration` | integer | Non | Durée estimée en minutes. |
+| `task_type_ids` | array of UUID | Non | Liste d'identifiants de types de tâche (max 5). |
 
 ### Exemple de requête
 
@@ -29,39 +36,47 @@ curl -X POST https://api.dispatchkit.io/api/v1/missions \
   -H "Content-Type: application/json" \
   -d '{
     "title": "Livraison urgent Rue de la Paix",
-    "origin_address": "12 Rue Beaubourg, 75004 Paris",
-    "destination_address": "8 Rue de la Paix, 75001 Paris",
-    "client_id": "cli_01J5XKTY4H3GNQV2",
-    "operator_id": "usr_01J5XKTY4H3GNQV2",
-    "scheduled_at": "2024-01-15T10:00:00Z",
-    "notes": "Code porte : 1234"
+    "address_text": "8 Rue de la Paix, 75001 Paris",
+    "address_lat": 48.8698,
+    "address_lng": 2.3311,
+    "client_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "scheduled_time": "2024-01-15T10:00:00Z",
+    "priority": "urgent",
+    "operator_id": "f1e2d3c4-b5a6-7890-abcd-ef1234567890",
+    "description": "Code porte : 1234"
   }'
 ```
 
-### Réponse `201 Created`
+### Réponse `200 OK`
 
 ```json
 {
-  "id": "mis_01J5XKTY4H3GNQV2",
+  "id": "c3d4e5f6-a7b8-9012-cdef-123456789012",
+  "mission_number": 42,
   "title": "Livraison urgent Rue de la Paix",
-  "status": "ASSIGNED",
-  "origin_address": "12 Rue Beaubourg, 75004 Paris",
-  "destination_address": "8 Rue de la Paix, 75001 Paris",
-  "notes": "Code porte : 1234",
-  "operator": {
-    "id": "usr_01J5XKTY4H3GNQV2",
-    "first_name": "Jean",
-    "last_name": "Dupont"
+  "status": "assigned",
+  "address_text": "8 Rue de la Paix, 75001 Paris",
+  "address_point": {
+    "lat": 48.8698,
+    "lng": 2.3311
   },
+  "description": "Code porte : 1234",
+  "priority": "urgent",
+  "operator_id": "f1e2d3c4-b5a6-7890-abcd-ef1234567890",
   "client": {
-    "id": "cli_01J5XKTY4H3GNQV2",
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
     "name": "Entreprise Martin SA"
   },
-  "scheduled_at": "2024-01-15T10:00:00Z",
-  "created_at": "2024-01-15T09:00:00Z"
+  "scheduled_time": "2024-01-15T10:00:00Z",
+  "created_at": "2024-01-15T09:00:00Z",
+  "updated_at": "2024-01-15T09:00:00Z"
 }
 ```
 
 <Aside type="note">
-  Si `operator_id` est fourni, la mission est créée avec le statut `ASSIGNED` et l'opérateur reçoit immédiatement une notification push.
+  Si `operator_id` est fourni, la mission est créée avec le statut `assigned` et l'opérateur reçoit immédiatement une notification push.
+</Aside>
+
+<Aside type="tip">
+  Pour une mission de type **Transport**, les champs `departure_address_text`, `departure_address_lat` et `departure_address_lng` sont obligatoires.
 </Aside>
