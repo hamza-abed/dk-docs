@@ -91,7 +91,6 @@ export default defineConfig({
                 { label: 'Lister', slug: 'api-reference/organizations/list' },
                 { label: 'Détail', slug: 'api-reference/organizations/get' },
                 { label: 'Membres', slug: 'api-reference/organizations/members' },
-                { label: "Changer d'org", slug: 'api-reference/organizations/switch' },
               ],
             },
             {
