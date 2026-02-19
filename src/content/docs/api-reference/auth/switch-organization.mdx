@@ -1,0 +1,74 @@
+---
+title: Changer d'organisation
+description: Émet de nouveaux tokens JWT pour une autre organisation de l'utilisateur.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## POST /auth/switch-organization
+
+Permet à un utilisateur membre de plusieurs organisations de changer d'organisation active. Retourne de nouveaux tokens JWT (access + refresh) scoped sur l'organisation cible.
+
+<Aside type="note">
+  L'utilisateur doit être membre de l'organisation cible. Un utilisateur appartient à plusieurs organisations lorsqu'il a été invité en tant qu'opérateur ou administrateur de plusieurs structures.
+</Aside>
+
+### Headers
+
+| Header | Requis | Description |
+|--------|--------|-------------|
+| `Authorization` | Oui | `Bearer <access_token>` |
+
+### Body
+
+| Paramètre | Type | Requis | Description |
+|-----------|------|--------|-------------|
+| `organization_id` | string (UUID) | Oui | Identifiant de l'organisation vers laquelle basculer. |
+
+### Exemple de requête
+
+```bash
+curl -X POST https://api.dispatchkit.io/api/v1/auth/switch-organization \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "organization_id": "b2c3d4e5-f6a7-8901-bcde-f12345678901"
+  }'
+```
+
+### Réponse `200 OK`
+
+Même format que `POST /auth/login` — retourne de nouveaux tokens et le profil utilisateur avec l'organisation active mise à jour.
+
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "expires_in": 3600,
+  "user": {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "email": "marie@transport-dupont.fr",
+    "first_name": "Marie",
+    "last_name": "Dupont",
+    "organization_id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+    "role": "admin"
+  },
+  "operator": {
+    "id": "c3d4e5f6-a7b8-9012-cdef-123456789012",
+    "first_name": "Marie",
+    "last_name": "Dupont",
+    "phone": "+33612345678",
+    "status": "available",
+    "organization_id": "b2c3d4e5-f6a7-8901-bcde-f12345678901"
+  }
+}
+```
+
+### Erreurs
+
+| Code HTTP | Description |
+|-----------|-------------|
+| `400` | `organization_id` manquant ou invalide |
+| `401` | Token manquant ou invalide |
+| `403` | L'utilisateur n'est pas membre de l'organisation cible |
+| `500` | Erreur interne |

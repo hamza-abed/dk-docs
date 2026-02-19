@@ -14,10 +14,10 @@ Envoie un email d'invitation à un opérateur pour rejoindre l'organisation. L'o
 | Paramètre | Type | Requis | Description |
 |-----------|------|--------|-------------|
 | `email` | string | Oui | Adresse email de l'opérateur à inviter. |
-| `first_name` | string | Oui | Prénom de l'opérateur. |
-| `last_name` | string | Oui | Nom de famille de l'opérateur. |
-| `phone` | string | Non | Numéro de téléphone (format international, ex. : `+33612345678`). |
-| `vehicle_plate` | string | Non | Numéro d'immatriculation du véhicule (optionnel). |
+
+<Aside type="caution">
+  Seul le champ `email` est pris en compte par le backend. Les champs `first_name`, `last_name`, `phone` et `vehicle_plate` sont ignorés s'ils sont envoyés.
+</Aside>
 
 ### Exemple de requête
 
@@ -26,11 +26,7 @@ curl -X POST https://api.dispatchkit.io/api/v1/operators/invite \
   -H "Authorization: Bearer {token}" \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "jean.dupont@exemple.fr",
-    "first_name": "Jean",
-    "last_name": "Dupont",
-    "phone": "+33612345678",
-    "vehicle_plate": "AB-123-CD"
+    "email": "jean.dupont@exemple.fr"
   }'
 ```
 
@@ -38,10 +34,8 @@ curl -X POST https://api.dispatchkit.io/api/v1/operators/invite \
 
 ```json
 {
-  "id": "usr_01J5XKTY4H3GNQV2",
+  "id": "c3d4e5f6-a7b8-9012-cdef-123456789012",
   "email": "jean.dupont@exemple.fr",
-  "first_name": "Jean",
-  "last_name": "Dupont",
   "status": "unavailable",
   "invitation_status": "pending",
   "invited_at": "2024-01-15T09:00:00Z"

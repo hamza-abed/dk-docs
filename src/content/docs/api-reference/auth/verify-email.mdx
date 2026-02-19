@@ -1,0 +1,35 @@
+---
+title: Vérification d'email
+description: Vérifie l'adresse email d'un utilisateur via le token reçu par email.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## GET /auth/verify-email
+
+Vérifie l'adresse email de l'utilisateur à partir du token envoyé lors de l'inscription. Redirige vers le frontend après traitement.
+
+<Aside type="note">
+  Cet endpoint est destiné à être ouvert directement depuis un navigateur (lien d'email). Il ne retourne pas de JSON mais effectue une redirection HTTP `302`.
+</Aside>
+
+### Query Parameters
+
+| Paramètre | Type | Requis | Description |
+|-----------|------|--------|-------------|
+| `token` | string | Oui | Token de vérification reçu par email. |
+
+### Exemple de requête
+
+```bash
+curl -L "https://api.dispatchkit.io/api/v1/auth/verify-email?token=abc123xyz"
+```
+
+### Comportement
+
+| Résultat | Redirection |
+|----------|-------------|
+| Succès | `{FRONTEND_URL}/login?verify=success` |
+| Token invalide | `{FRONTEND_URL}/login?verify=invalid` |
+| Token manquant | `{FRONTEND_URL}/login?verify=error&reason=missing_token` |
+| Erreur serveur | `{FRONTEND_URL}/login?verify=error` |
