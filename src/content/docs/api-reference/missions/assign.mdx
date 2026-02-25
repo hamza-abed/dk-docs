@@ -7,55 +7,72 @@ import { Aside } from '@astrojs/starlight/components';
 
 ## POST /missions/`{id}`/assign
 
-Assigne une mission `PENDING` à un opérateur. L'opérateur reçoit une notification push et la mission passe au statut `ASSIGNED`.
+Assigne une mission à un opérateur. L'opérateur reçoit une notification push et la mission passe au statut `assigned`.
 
 ### Path params
 
 | Paramètre | Type | Requis | Description |
 |-----------|------|--------|-------------|
-| `id` | string | Oui | Identifiant de la mission à assigner. |
+| `id` | string (UUID) | Oui | Identifiant de la mission à assigner. |
 
 ### Body
 
 | Paramètre | Type | Requis | Description |
 |-----------|------|--------|-------------|
-| `operator_id` | string | Oui | Identifiant de l'opérateur à qui assigner la mission. L'opérateur doit avoir le statut `available`. |
+| `operator_id` | string (UUID) | Oui | Identifiant de l'opérateur à qui assigner la mission. |
 
 ### Exemple de requête
 
 ```bash
-curl -X POST https://api.dispatchkit.io/api/v1/missions/mis_01J5XKTY4H3GNQV2/assign \
+curl -X POST https://api.dispatchkit.io/api/v1/missions/c3d4e5f6-a7b8-9012-cdef-123456789012/assign \
   -H "Authorization: Bearer {token}" \
   -H "Content-Type: application/json" \
   -d '{
-    "operator_id": "usr_01J5XKTY4H3GNQV2"
+    "operator_id": "f1e2d3c4-b5a6-7890-abcd-ef1234567890"
   }'
 ```
 
 ### Réponse `200 OK`
 
+La réponse retourne la mission complète mise à jour avec le statut `assigned` et les informations de l'opérateur.
+
 ```json
 {
-  "id": "mis_01J5XKTY4H3GNQV2",
-  "status": "ASSIGNED",
+  "id": "c3d4e5f6-a7b8-9012-cdef-123456789012",
+  "mission_number": 42,
+  "title": "Livraison Rue de la Paix",
+  "status": "assigned",
+  "address_text": "8 Rue de la Paix, 75001 Paris",
+  "address_point": {
+    "lat": 48.8698,
+    "lng": 2.3311
+  },
+  "operator_id": "f1e2d3c4-b5a6-7890-abcd-ef1234567890",
   "operator": {
-    "id": "usr_01J5XKTY4H3GNQV2",
+    "id": "f1e2d3c4-b5a6-7890-abcd-ef1234567890",
     "first_name": "Jean",
     "last_name": "Dupont"
   },
-  "assigned_at": "2024-01-15T09:15:00Z"
+  "client": {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "name": "Entreprise Martin SA"
+  },
+  "priority": "urgent",
+  "scheduled_time": "2024-01-15T10:00:00Z",
+  "task_types": [],
+  "created_at": "2024-01-15T09:00:00Z",
+  "updated_at": "2024-01-15T09:15:00Z"
 }
 ```
 
 ### Erreurs
 
-| Code HTTP | Code erreur | Description |
-|-----------|-------------|-------------|
-| `404` | `MISSION_NOT_FOUND` | Mission introuvable |
-| `422` | `MISSION_ALREADY_ASSIGNED` | La mission est déjà assignée |
-| `422` | `OPERATOR_NOT_AVAILABLE` | L'opérateur n'est pas disponible (`on_mission` ou `unavailable`) |
-| `422` | `OPERATOR_NOT_IN_ORGANIZATION` | L'opérateur n'appartient pas à cette organisation |
+| Code HTTP | Description |
+|-----------|-------------|
+| `400` | Données invalides (ID mission ou opérateur invalide) |
+| `404` | Mission ou opérateur introuvable dans cette organisation |
+| `500` | Échec de l'assignation |
 
 <Aside type="note">
-  Pour réassigner une mission déjà `ASSIGNED`, appelez d'abord l'endpoint de mise à jour pour repasser en `PENDING`, puis réassignez. Une mission `IN_PROGRESS` ou au-delà ne peut pas être réassignée.
+  Les statuts de mission sont en minuscules : `unassigned`, `assigned`, `in_progress`, `completed`. La réponse retourne la mission complète (pas uniquement l'ID et le statut).
 </Aside>

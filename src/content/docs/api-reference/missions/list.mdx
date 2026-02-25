@@ -1,62 +1,65 @@
 ---
 title: Lister les missions
-description: Récupère la liste paginée des missions de l'organisation.
+description: Récupère la liste des missions de l'organisation.
 ---
+
+import { Aside } from '@astrojs/starlight/components';
 
 ## GET /missions
 
-Retourne la liste paginée des missions de l'organisation active. Supporte le filtrage par statut, opérateur, client et date.
+Retourne la liste des missions de l'organisation active. Supporte le filtrage par date et types de tâche.
 
 ### Query params
 
 | Paramètre | Type | Description |
 |-----------|------|-------------|
-| `status` | string | Filtre par statut. Valeurs : `PENDING`, `ASSIGNED`, `IN_PROGRESS`, `ON_SITE`, `COMPLETED`, `CANCELLED`. Peut être répété pour filtrer sur plusieurs statuts : `?status=PENDING&status=ASSIGNED`. |
-| `operator_id` | string | Filtre les missions assignées à un opérateur spécifique. |
-| `client_id` | string | Filtre les missions d'un client spécifique. |
-| `from` | string | Date de début au format ISO 8601. Filtre sur `created_at`. |
-| `to` | string | Date de fin au format ISO 8601. Filtre sur `created_at`. |
-| `page` | integer | Numéro de page (défaut : `1`). |
-| `per_page` | integer | Résultats par page (défaut : `20`, max : `100`). |
+| `date` | string | Filtre par date au format `YYYY-MM-DD`. Retourne les missions planifiées à cette date. |
+| `task_type_ids` | string | Liste d'identifiants de types de tâche séparés par des virgules. |
+
+<Aside type="note">
+  L'API retourne un tableau JSON directement (pas de pagination ni d'enveloppe). Si aucun filtre n'est fourni, toutes les missions de l'organisation sont retournées.
+</Aside>
 
 ### Exemple de requête
 
 ```bash
-# Missions en cours aujourd'hui
-curl "https://api.dispatchkit.io/api/v1/missions?status=IN_PROGRESS&status=ON_SITE&from=2024-01-15T00:00:00Z" \
+# Missions du 15 janvier 2024
+curl "https://api.dispatchkit.io/api/v1/missions?date=2024-01-15" \
   -H "Authorization: Bearer {token}"
 ```
 
-### Réponse
+### Réponse `200 OK`
 
 ```json
-{
-  "missions": [
-    {
-      "id": "mis_01J5XKTY4H3GNQV2",
-      "title": "Livraison Rue de la Paix",
-      "status": "IN_PROGRESS",
-      "origin_address": "12 Rue Beaubourg, 75004 Paris",
-      "destination_address": "8 Rue de la Paix, 75001 Paris",
-      "operator": {
-        "id": "usr_01J5XKTY4H3GNQV2",
-        "first_name": "Jean",
-        "last_name": "Dupont"
-      },
-      "client": {
-        "id": "cli_01J5XKTY4H3GNQV2",
-        "name": "Entreprise Martin SA"
-      },
-      "scheduled_at": "2024-01-15T10:00:00Z",
-      "started_at": "2024-01-15T10:05:00Z",
-      "created_at": "2024-01-15T09:00:00Z"
-    }
-  ],
-  "pagination": {
-    "page": 1,
-    "per_page": 20,
-    "total": 47,
-    "total_pages": 3
+[
+  {
+    "id": "c3d4e5f6-a7b8-9012-cdef-123456789012",
+    "mission_number": 42,
+    "title": "Livraison Rue de la Paix",
+    "status": "in_progress",
+    "address_text": "8 Rue de la Paix, 75001 Paris",
+    "address_point": {
+      "lat": 48.8698,
+      "lng": 2.3311
+    },
+    "operator_id": "f1e2d3c4-b5a6-7890-abcd-ef1234567890",
+    "operator": {
+      "id": "f1e2d3c4-b5a6-7890-abcd-ef1234567890",
+      "first_name": "Jean",
+      "last_name": "Dupont"
+    },
+    "client": {
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "name": "Entreprise Martin SA"
+    },
+    "priority": "urgent",
+    "scheduled_time": "2024-01-15T10:00:00Z",
+    "created_at": "2024-01-15T09:00:00Z",
+    "updated_at": "2024-01-15T10:05:00Z"
   }
-}
+]
 ```
+
+<Aside type="tip">
+  Les statuts possibles sont : `unassigned`, `assigned`, `in_progress`, `completed`.
+</Aside>

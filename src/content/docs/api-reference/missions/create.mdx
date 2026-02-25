@@ -27,6 +27,7 @@ Crée une nouvelle mission. La mission peut être assignée à un opérateur dè
 | `description` | string | Non | Description ou notes internes pour l'opérateur (instructions spéciales, code d'accès, etc.). |
 | `estimated_duration` | integer | Non | Durée estimée en minutes. |
 | `task_type_ids` | array of UUID | Non | Liste d'identifiants de types de tâche (max 5). |
+| `custom_fields` | object | Non | Champs personnalisés (JSON libre). |
 
 ### Exemple de requête
 
@@ -74,7 +75,7 @@ curl -X POST https://api.dispatchkit.io/api/v1/missions \
 ```
 
 <Aside type="note">
-  Si `operator_id` est fourni, la mission est créée avec le statut `assigned` et l'opérateur reçoit immédiatement une notification push.
+  Si `operator_id` est fourni, la mission est créée avec le statut `assigned` et l'opérateur reçoit immédiatement une notification push. Sinon, le statut est `unassigned`.
 </Aside>
 
 <Aside type="tip">

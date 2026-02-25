@@ -3,59 +3,72 @@ title: Compléter une mission
 description: Marque une mission comme terminée avec un reçu de complétion.
 ---
 
+import { Aside } from '@astrojs/starlight/components';
+
 ## POST /missions/`{id}`/complete
 
-Marque une mission comme `COMPLETED`. Cet endpoint est principalement appelé par l'application mobile de l'opérateur. Il peut aussi être appelé par un dispatcher pour forcer la complétion.
+Marque une mission comme `completed`. Cet endpoint est principalement appelé par l'application mobile de l'opérateur. Il peut aussi être appelé par un dispatcher pour forcer la complétion.
+
+<Aside type="caution">
+  Cet endpoint attend du `multipart/form-data`, pas du JSON.
+</Aside>
 
 ### Path params
 
 | Paramètre | Type | Requis | Description |
 |-----------|------|--------|-------------|
-| `id` | string | Oui | Identifiant de la mission à compléter. Doit être au statut `IN_PROGRESS` ou `ON_SITE`. |
+| `id` | string (UUID) | Oui | Identifiant de la mission à compléter. |
 
-### Body
+### Body (`multipart/form-data`)
 
-| Paramètre | Type | Description |
-|-----------|------|-------------|
-| `notes` | string | Notes de complétion de l'opérateur (observations, incidents, etc.). Max 2000 caractères. |
-| `photos` | array | URLs des photos de preuve uploadées via l'API d'upload. Max 5 photos. |
-| `signature_url` | string | URL de l'image de signature du client, uploadée via l'API d'upload. |
+| Paramètre | Type | Requis | Description |
+|-----------|------|--------|-------------|
+| `amount` | string | Oui | Montant du reçu (ex: `"150.00"`). |
+| `payment_method` | string | Non | Méthode de paiement (ex: `cash`, `card`, `transfer`). |
+| `notes` | string | Non | Notes de complétion de l'opérateur. |
+| `latitude` | number | Non | Latitude de la position au moment de la complétion. |
+| `longitude` | number | Non | Longitude de la position au moment de la complétion. |
+| `photo` | file | Non | Photo de preuve / reçu (upload fichier). |
 
 ### Exemple de requête
 
 ```bash
-curl -X POST https://api.dispatchkit.io/api/v1/missions/mis_01J5XKTY4H3GNQV2/complete \
+curl -X POST https://api.dispatchkit.io/api/v1/missions/c3d4e5f6-a7b8-9012-cdef-123456789012/complete \
   -H "Authorization: Bearer {token}" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "notes": "Livraison effectuée sans incident. Client satisfait.",
-    "photos": [
-      "https://cdn.dispatchkit.io/uploads/photo-abc123.jpg"
-    ],
-    "signature_url": "https://cdn.dispatchkit.io/uploads/signature-def456.png"
-  }'
+  -F "amount=150.00" \
+  -F "payment_method=cash" \
+  -F "notes=Livraison effectuée sans incident." \
+  -F "latitude=48.8698" \
+  -F "longitude=2.3311" \
+  -F "photo=@/path/to/receipt.jpg"
 ```
 
 ### Réponse `200 OK`
 
+La réponse contient la mission mise à jour avec le statut `completed` et le reçu associé.
+
 ```json
 {
-  "id": "mis_01J5XKTY4H3GNQV2",
-  "status": "COMPLETED",
-  "completed_at": "2024-01-15T10:45:00Z",
+  "id": "c3d4e5f6-a7b8-9012-cdef-123456789012",
+  "mission_number": 42,
+  "title": "Livraison Rue de la Paix",
+  "status": "completed",
   "receipt": {
-    "notes": "Livraison effectuée sans incident. Client satisfait.",
-    "photos": [
-      "https://cdn.dispatchkit.io/receipts/mis_01J5X.../photo-1.jpg"
-    ],
-    "signature_url": "https://cdn.dispatchkit.io/receipts/mis_01J5X.../signature.png"
-  }
+    "id": "d4e5f6a7-b890-1234-cdef-567890123456",
+    "amount": "150.00",
+    "payment_method": "cash",
+    "notes": "Livraison effectuée sans incident.",
+    "photo_url": "uploads/receipts/receipt-abc123.jpg"
+  },
+  "created_at": "2024-01-15T09:00:00Z",
+  "updated_at": "2024-01-15T10:45:00Z"
 }
 ```
 
 ### Erreurs
 
-| Code HTTP | Code erreur | Description |
-|-----------|-------------|-------------|
-| `403` | `NOT_ASSIGNED_OPERATOR` | Seul l'opérateur assigné peut compléter la mission |
-| `422` | `INVALID_MISSION_STATUS` | La mission n'est pas dans un statut complétable |
+| Code HTTP | Description |
+|-----------|-------------|
+| `400` | Données invalides (champ `amount` manquant, ID invalide) |
+| `404` | Mission introuvable |
+| `422` | La mission n'est pas dans un statut complétable |
