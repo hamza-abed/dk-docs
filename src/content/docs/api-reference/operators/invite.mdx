@@ -82,8 +82,16 @@ curl -X POST https://api.dispatchkit.io/api/v1/operators/c3d4e5f6-a7b8-9012-cdef
 
 ### Erreurs
 
+**POST /operators/invite** (invitation par email) :
+
+| Code HTTP | Description |
+|-----------|-------------|
+| `400` | Email invalide ou manquant |
+| `409` | Cet email est déjà membre de l'organisation |
+
+**POST /operators/`{id}`/invite** (invitation d'un opérateur existant) :
+
 | Code HTTP | Description |
 |-----------|-------------|
 | `400` | L'opérateur n'a pas d'adresse email renseignée |
 | `404` | Opérateur introuvable |
-| `409` | Cet email est déjà membre de l'organisation (pour l'invitation par email) |

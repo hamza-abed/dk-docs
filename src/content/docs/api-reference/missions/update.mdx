@@ -10,7 +10,7 @@ import { Aside } from '@astrojs/starlight/components';
 Met à jour les champs d'une mission. Seuls les champs fournis dans le body sont modifiés (patch partiel).
 
 <Aside type="caution">
-  Seules les missions au statut `PENDING` ou `ASSIGNED` peuvent être modifiées. Tenter de modifier une mission `IN_PROGRESS` ou au-delà retourne une erreur `422`.
+  Seules les missions au statut `unassigned` ou `assigned` peuvent être modifiées. Tenter de modifier une mission `in_progress` ou au-delà retourne une erreur `422`.
 </Aside>
 
 ### Path params
@@ -28,13 +28,13 @@ Met à jour les champs d'une mission. Seuls les champs fournis dans le body sont
 | `destination_address` | string | Nouvelle adresse de destination. |
 | `notes` | string | Notes mises à jour pour l'opérateur. |
 | `scheduled_at` | string | Nouvelle date planifiée au format ISO 8601. |
-| `status` | string | Permet d'annuler la mission en passant `CANCELLED`. Requiert `cancellation_reason`. |
-| `cancellation_reason` | string | Raison de l'annulation (obligatoire si `status` = `CANCELLED`). |
+| `status` | string | Permet d'annuler la mission en passant `cancelled`. Requiert `cancellation_reason`. |
+| `cancellation_reason` | string | Raison de l'annulation (obligatoire si `status` = `cancelled`). |
 
 ### Exemple de requête
 
 ```bash
-curl -X PATCH https://api.dispatchkit.io/api/v1/missions/mis_01J5XKTY4H3GNQV2 \
+curl -X PATCH https://api.dispatchkit.io/api/v1/missions/c3d4e5f6-a7b8-9012-cdef-123456789012 \
   -H "Authorization: Bearer {token}" \
   -H "Content-Type: application/json" \
   -d '{
@@ -49,9 +49,9 @@ Retourne la mission complète mise à jour.
 
 ```json
 {
-  "id": "mis_01J5XKTY4H3GNQV2",
+  "id": "c3d4e5f6-a7b8-9012-cdef-123456789012",
   "title": "Livraison Rue de la Paix",
-  "status": "ASSIGNED",
+  "status": "assigned",
   "notes": "Code porte mis à jour : 5678",
   "scheduled_at": "2024-01-15T11:00:00Z",
   "updated_at": "2024-01-15T09:30:00Z"

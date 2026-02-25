@@ -16,7 +16,7 @@ Retourne le profil complet d'un opérateur de l'organisation, incluant son statu
 ### Exemple de requête
 
 ```bash
-curl https://api.dispatchkit.io/api/v1/operators/usr_01J5XKTY4H3GNQV2 \
+curl https://api.dispatchkit.io/api/v1/operators/f1e2d3c4-b5a6-7890-abcd-ef1234567890 \
   -H "Authorization: Bearer {token}"
 ```
 
@@ -24,7 +24,7 @@ curl https://api.dispatchkit.io/api/v1/operators/usr_01J5XKTY4H3GNQV2 \
 
 ```json
 {
-  "id": "usr_01J5XKTY4H3GNQV2",
+  "id": "f1e2d3c4-b5a6-7890-abcd-ef1234567890",
   "first_name": "Jean",
   "last_name": "Dupont",
   "email": "jean.dupont@transport-dupont.fr",
@@ -38,9 +38,9 @@ curl https://api.dispatchkit.io/api/v1/operators/usr_01J5XKTY4H3GNQV2 \
     "updated_at": "2024-01-15T10:32:00Z"
   },
   "current_mission": {
-    "id": "mis_01J5XKTY4H3GNQV9",
+    "id": "d4e5f6a7-b890-1234-cdef-567890123456",
     "title": "Livraison Avenue de l'Opéra",
-    "status": "IN_PROGRESS"
+    "status": "in_progress"
   },
   "stats": {
     "missions_completed_today": 3,

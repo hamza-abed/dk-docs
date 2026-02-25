@@ -26,8 +26,8 @@ Marque une mission comme `completed`. Cet endpoint est principalement appelé pa
 | `amount` | string | Oui | Montant du reçu (ex: `"150.00"`). |
 | `payment_method` | string | Non | Méthode de paiement (ex: `cash`, `card`, `transfer`). |
 | `notes` | string | Non | Notes de complétion de l'opérateur. |
-| `latitude` | number | Non | Latitude de la position au moment de la complétion. |
-| `longitude` | number | Non | Longitude de la position au moment de la complétion. |
+| `latitude` | string | Non | Latitude de la position au moment de la complétion (ex: `"48.8698"`). Envoyé comme string en multipart, parsé en float côté backend. |
+| `longitude` | string | Non | Longitude de la position au moment de la complétion (ex: `"2.3311"`). Envoyé comme string en multipart, parsé en float côté backend. |
 | `photo` | file | Non | Photo de preuve / reçu (upload fichier). |
 
 ### Exemple de requête
