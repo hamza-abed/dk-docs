@@ -18,6 +18,10 @@ Crée un nouveau compte utilisateur. Une organisation est automatiquement créé
 | `first_name` | string | Oui | Prénom de l'utilisateur. |
 | `last_name` | string | Oui | Nom de famille de l'utilisateur. |
 
+<Aside type="note">
+  Le champ `organization_name` n'est **pas** supporté par le backend. L'organisation est créée automatiquement avec un nom par défaut. Pour renommer l'organisation, utilisez l'endpoint `PUT /organizations/{id}` après l'inscription.
+</Aside>
+
 ### Exemple de requête
 
 ```bash
@@ -44,13 +48,15 @@ curl -X POST https://api.dispatchkit.io/api/v1/auth/register \
 | `user.first_name` | string | Prénom. |
 | `user.last_name` | string | Nom de famille. |
 | `user.organization_id` | string (UUID) | ID de l'organisation créée. |
-| `user.role` | string | Rôle dans l'organisation (ex. `admin`). |
-| `operator` | object | Profil opérateur associé à l'utilisateur. |
+| `user.role` | string | Rôle dans l'organisation : `admin`. |
+| `operator` | object | Profil opérateur associé à l'utilisateur (optionnel). |
 | `operator.id` | string (UUID) | Identifiant de l'opérateur. |
 | `operator.first_name` | string | Prénom de l'opérateur. |
 | `operator.last_name` | string | Nom de famille. |
 | `operator.phone` | string | Numéro de téléphone. |
 | `operator.status` | string | Statut de disponibilité (`available`, etc.). |
+| `operator.organization_id` | string (UUID) | ID de l'organisation. |
+| `organizations` | array | Liste des organisations de l'utilisateur. |
 
 ```json
 {
@@ -58,27 +64,23 @@ curl -X POST https://api.dispatchkit.io/api/v1/auth/register \
   "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "expires_in": 3600,
   "user": {
-    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "id": "a1b2c3d4-e5f6-4890-abcd-ef1234567890",
     "email": "marie@transport-dupont.fr",
     "first_name": "Marie",
     "last_name": "Dupont",
-    "organization_id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+    "organization_id": "b2c3d4e5-f6a7-4901-bcde-f12345678901",
     "role": "admin"
   },
   "operator": {
-    "id": "c3d4e5f6-a7b8-9012-cdef-123456789012",
+    "id": "c3d4e5f6-a7b8-4012-8def-123456789012",
     "first_name": "Marie",
     "last_name": "Dupont",
     "phone": "",
     "status": "available",
-    "organization_id": "b2c3d4e5-f6a7-8901-bcde-f12345678901"
+    "organization_id": "b2c3d4e5-f6a7-4901-bcde-f12345678901"
   }
 }
 ```
-
-<Aside type="note">
-  `user.role` est actuellement `"admin"` pour tout nouvel inscrit (premier administrateur de l'organisation). Ce champ peut être vide si la relation organisation/opérateur n'est pas encore créée.
-</Aside>
 
 ### Erreurs
 

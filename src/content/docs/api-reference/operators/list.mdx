@@ -3,67 +3,60 @@ title: Lister les opérateurs
 description: Récupère la liste des opérateurs de l'organisation.
 ---
 
+import { Aside } from '@astrojs/starlight/components';
+
 ## GET /operators
 
-Retourne la liste de tous les opérateurs de l'organisation active avec leur statut et leur dernière position connue.
+Retourne la liste de tous les opérateurs de l'organisation active.
 
 ### Query params
 
 | Paramètre | Type | Description |
 |-----------|------|-------------|
-| `status` | string | Filtre par statut : `available`, `on_mission`, `unavailable`. |
-| `page` | integer | Numéro de page (défaut : `1`). |
-| `per_page` | integer | Résultats par page (défaut : `20`, max : `100`). |
+| `covers_point` | string | Filtre les opérateurs dont la zone de couverture couvre un point géographique. Format : `lng,lat` (ex: `2.3522,48.8566`). |
+
+<Aside type="note">
+  L'API retourne un tableau JSON directement (pas de pagination ni d'enveloppe). Tous les opérateurs de l'organisation sont retournés.
+</Aside>
 
 ### Exemple de requête
 
 ```bash
-# Tous les opérateurs disponibles
-curl "https://api.dispatchkit.io/api/v1/operators?status=available" \
+# Tous les opérateurs
+curl "https://api.dispatchkit.io/api/v1/operators" \
+  -H "Authorization: Bearer {token}"
+
+# Opérateurs couvrant un point précis
+curl "https://api.dispatchkit.io/api/v1/operators?covers_point=2.3522,48.8566" \
   -H "Authorization: Bearer {token}"
 ```
 
-### Réponse
+### Réponse `200 OK`
 
 ```json
-{
-  "operators": [
-    {
-      "id": "usr_01J5XKTY4H3GNQV2",
-      "first_name": "Jean",
-      "last_name": "Dupont",
-      "email": "jean.dupont@transport-dupont.fr",
-      "phone": "+33612345678",
-      "vehicle_plate": "AB-123-CD",
-      "status": "available",
-      "last_position": {
-        "lat": 48.8566,
-        "lng": 2.3522,
-        "updated_at": "2024-01-15T10:30:00Z"
-      },
-      "current_mission_id": null,
-      "joined_at": "2024-01-05T09:00:00Z"
-    },
-    {
-      "id": "usr_01J5XKTY4H3GNQV3",
-      "first_name": "Sophie",
-      "last_name": "Martin",
-      "email": "sophie.martin@transport-dupont.fr",
-      "status": "on_mission",
-      "last_position": {
-        "lat": 48.8647,
-        "lng": 2.3499,
-        "updated_at": "2024-01-15T10:32:00Z"
-      },
-      "current_mission_id": "mis_01J5XKTY4H3GNQV9",
-      "joined_at": "2024-01-08T09:00:00Z"
-    }
-  ],
-  "pagination": {
-    "page": 1,
-    "per_page": 20,
-    "total": 12,
-    "total_pages": 1
+[
+  {
+    "id": "f1e2d3c4-b5a6-4890-abcd-ef1234567890",
+    "first_name": "Jean",
+    "last_name": "Dupont",
+    "email": "jean.dupont@transport-dupont.fr",
+    "phone": "+33612345678",
+    "status": "available",
+    "task_types": [
+      {
+        "id": "a1b2c3d4-e5f6-4890-abcd-ef1234567890",
+        "name": "Livraison",
+        "color": "#3B82F6"
+      }
+    ]
+  },
+  {
+    "id": "e2d3c4b5-a697-8901-bcde-f12345678901",
+    "first_name": "Sophie",
+    "last_name": "Martin",
+    "email": "sophie.martin@transport-dupont.fr",
+    "status": "on_mission",
+    "phone": "+33698765432"
   }
-}
+]
 ```
