@@ -24,11 +24,11 @@ Assigne une mission à un opérateur. L'opérateur reçoit une notification push
 ### Exemple de requête
 
 ```bash
-curl -X POST https://api.dispatchkit.io/api/v1/missions/c3d4e5f6-a7b8-9012-cdef-123456789012/assign \
+curl -X POST https://api.dispatchkit.io/api/v1/missions/c3d4e5f6-a7b8-4012-8def-123456789012/assign \
   -H "Authorization: Bearer {token}" \
   -H "Content-Type: application/json" \
   -d '{
-    "operator_id": "f1e2d3c4-b5a6-7890-abcd-ef1234567890"
+    "operator_id": "f1e2d3c4-b5a6-4890-abcd-ef1234567890"
   }'
 ```
 
@@ -38,7 +38,7 @@ La réponse retourne la mission complète mise à jour avec le statut `assigned`
 
 ```json
 {
-  "id": "c3d4e5f6-a7b8-9012-cdef-123456789012",
+  "id": "c3d4e5f6-a7b8-4012-8def-123456789012",
   "mission_number": 42,
   "title": "Livraison Rue de la Paix",
   "status": "assigned",
@@ -47,14 +47,14 @@ La réponse retourne la mission complète mise à jour avec le statut `assigned`
     "lat": 48.8698,
     "lng": 2.3311
   },
-  "operator_id": "f1e2d3c4-b5a6-7890-abcd-ef1234567890",
+  "operator_id": "f1e2d3c4-b5a6-4890-abcd-ef1234567890",
   "operator": {
-    "id": "f1e2d3c4-b5a6-7890-abcd-ef1234567890",
+    "id": "f1e2d3c4-b5a6-4890-abcd-ef1234567890",
     "first_name": "Jean",
     "last_name": "Dupont"
   },
   "client": {
-    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "id": "a1b2c3d4-e5f6-4890-abcd-ef1234567890",
     "name": "Entreprise Martin SA"
   },
   "priority": "urgent",

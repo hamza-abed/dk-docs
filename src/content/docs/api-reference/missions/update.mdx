@@ -34,7 +34,7 @@ Met à jour les champs d'une mission. Seuls les champs fournis dans le body sont
 ### Exemple de requête
 
 ```bash
-curl -X PATCH https://api.dispatchkit.io/api/v1/missions/c3d4e5f6-a7b8-9012-cdef-123456789012 \
+curl -X PATCH https://api.dispatchkit.io/api/v1/missions/c3d4e5f6-a7b8-4012-8def-123456789012 \
   -H "Authorization: Bearer {token}" \
   -H "Content-Type: application/json" \
   -d '{
@@ -49,7 +49,7 @@ Retourne la mission complète mise à jour.
 
 ```json
 {
-  "id": "c3d4e5f6-a7b8-9012-cdef-123456789012",
+  "id": "c3d4e5f6-a7b8-4012-8def-123456789012",
   "title": "Livraison Rue de la Paix",
   "status": "assigned",
   "notes": "Code porte mis à jour : 5678",

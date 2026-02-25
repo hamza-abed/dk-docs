@@ -41,7 +41,7 @@ Certains endpoints retournent un tableau JSON directement, sans enveloppe ni pag
 ```json
 [
   {
-    "id": "c3d4e5f6-a7b8-9012-cdef-123456789012",
+    "id": "c3d4e5f6-a7b8-4012-8def-123456789012",
     "title": "Livraison Rue de la Paix",
     "status": "in_progress",
     "address_text": "10 Rue de la Paix, Paris",
@@ -55,7 +55,7 @@ Certains endpoints retournent un tableau JSON directement, sans enveloppe ni pag
 
 ```json
 {
-  "id": "c3d4e5f6-a7b8-9012-cdef-123456789012",
+  "id": "c3d4e5f6-a7b8-4012-8def-123456789012",
   "title": "Livraison Rue de la Paix",
   "status": "in_progress",
   "address_text": "10 Rue de la Paix, Paris",
@@ -72,7 +72,7 @@ Certains endpoints retournent un tableau JSON directement, sans enveloppe ni pag
     "code": "OPERATOR_NOT_AVAILABLE",
     "message": "L'opérateur sélectionné n'est pas disponible",
     "details": {
-      "operator_id": "f1e2d3c4-b5a6-7890-abcd-ef1234567890",
+      "operator_id": "f1e2d3c4-b5a6-4890-abcd-ef1234567890",
       "current_status": "on_mission"
     }
   }
@@ -126,10 +126,10 @@ Tous les identifiants sont des **UUID v4** standards (générés par PostgreSQL 
 
 | Ressource | Format | Exemple |
 |-----------|--------|---------|
-| Mission | UUID v4 | `c3d4e5f6-a7b8-9012-cdef-123456789012` |
-| Utilisateur / Opérateur | UUID v4 | `f1e2d3c4-b5a6-7890-abcd-ef1234567890` |
-| Client | UUID v4 | `a1b2c3d4-e5f6-7890-abcd-ef1234567890` |
-| Organisation | UUID v4 | `b2c3d4e5-f6a7-8901-bcde-f12345678901` |
+| Mission | UUID v4 | `c3d4e5f6-a7b8-4012-8def-123456789012` |
+| Utilisateur / Opérateur | UUID v4 | `f1e2d3c4-b5a6-4890-abcd-ef1234567890` |
+| Client | UUID v4 | `a1b2c3d4-e5f6-4890-abcd-ef1234567890` |
+| Organisation | UUID v4 | `b2c3d4e5-f6a7-4901-bcde-f12345678901` |
 
 ## Versionnement
 

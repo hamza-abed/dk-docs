@@ -32,7 +32,7 @@ curl -X POST https://api.dispatchkit.io/api/v1/operators/invite \
 {
   "message": "Invitation sent successfully",
   "invitation": {
-    "id": "c3d4e5f6-a7b8-9012-cdef-123456789012",
+    "id": "c3d4e5f6-a7b8-4012-8def-123456789012",
     "token": "abc123...",
     "email": "jean.dupont@exemple.fr",
     "expires_at": "2024-01-22T09:00:00Z",
@@ -56,7 +56,7 @@ Envoie (ou renvoie) une invitation à un opérateur déjà créé dans l'organis
 ### Exemple de requête
 
 ```bash
-curl -X POST https://api.dispatchkit.io/api/v1/operators/c3d4e5f6-a7b8-9012-cdef-123456789012/invite \
+curl -X POST https://api.dispatchkit.io/api/v1/operators/c3d4e5f6-a7b8-4012-8def-123456789012/invite \
   -H "Authorization: Bearer {token}"
 ```
 
