@@ -90,6 +90,7 @@ export default defineConfig({
               items: [
                 { label: 'Lister', slug: 'api-reference/organizations/list' },
                 { label: 'Détail', slug: 'api-reference/organizations/get' },
+                { label: 'Modifier', slug: 'api-reference/organizations/update' },
                 { label: 'Membres', slug: 'api-reference/organizations/members' },
               ],
             },
