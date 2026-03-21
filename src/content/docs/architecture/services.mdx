@@ -78,6 +78,7 @@ Conçu pour gérer **10 000+ positions/minute** sans dégradation :
 - Insertion batch dans TimescaleDB avec partitionnement temporel
 - Cache Redis pour les lectures de la "dernière position"
 - Indexation par `(operator_id, timestamp)` pour les requêtes d'historique
+- Toutes les positions sont stockées et indexées par `operator_id` (extrait du claim JWT) — `user_id` n'est pas utilisé pour le stockage GPS
 
 ### Rétention des données
 - **Données complètes** : 90 jours
