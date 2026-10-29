@@ -58,6 +58,41 @@ curl -X POST https://api.dispatchkit.io/api/v1/auth/login \
 }
 ```
 
+### Structure du token JWT
+
+Le token JWT contient les claims suivants dans son payload :
+
+**Opérateur (compte chauffeur/terrain)**
+```json
+{
+  "user_id": "usr_01J5XKTY4H3GNQV2",
+  "operator_id": "usr_01J5XKTY4H3GNQV2",
+  "organizations": [
+    {
+      "id": "org_01J5XKTY4H3GNQV2",
+      "role": "operator",
+      "name": "Transport Dupont SAS"
+    }
+  ]
+}
+```
+
+**Client / Manager (compte dashboard)**
+```json
+{
+  "user_id": "usr_01J5XKTY4H3GNQV2",
+  "organizations": [
+    {
+      "id": "org_01J5XKTY4H3GNQV2",
+      "role": "client",
+      "name": "Transport Dupont SAS"
+    }
+  ]
+}
+```
+
+> Le claim `operator_id` est uniquement présent pour les comptes opérateurs. Le service dk-positions l'utilise pour associer les positions GPS à l'opérateur. Le claim `email` n'est plus inclus dans le payload JWT.
+
 ### Erreurs
 
 | Code HTTP | Code erreur | Description |
