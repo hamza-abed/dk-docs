@@ -2,7 +2,7 @@
 
 ## Chemin absolu
 
-`/Users/habed.externe/dk/dk-docs`
+`~/perso/dk-claude/dk-docs`
 
 ## Description
 
